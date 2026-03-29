@@ -33,6 +33,14 @@ export interface Post {
   createdAt: string
 }
 
+export interface Survey {
+  gender: '男性' | '女性' | 'その他' | '回答しない'
+  ageGroup: '10代' | '20代' | '30代' | '40代' | '50代以上'
+  prefecture: string
+  appsUsed: '0個' | '1個' | '2個' | '3個' | '4個' | '5個以上'
+  dataConsent: boolean
+}
+
 export interface User {
   id: string
   name: string
@@ -40,6 +48,9 @@ export interface User {
   bio: string
   following: string[]
   followers: string[]
+  email?: string
+  authMethod?: 'google' | 'apple' | 'email'
+  survey?: Survey
 }
 
 export interface ChatMessage {
@@ -55,6 +66,7 @@ export interface ChatMessage {
 
 export interface AppState {
   currentUserId: string
+  onboardingCompleted: boolean
   users: User[]
   transactions: Transaction[]
   posts: Post[]

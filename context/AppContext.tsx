@@ -8,8 +8,8 @@ import {
   useCallback,
   ReactNode,
 } from 'react'
-import { AppState, Transaction, Post, User, Comment, ChatMessage } from '@/lib/types'
-import { getState, saveState } from '@/lib/storage'
+import { AppState, Transaction, Post, User, Comment, ChatMessage, Survey } from '@/lib/types'
+import { getState, saveState, createInitialState } from '@/lib/storage'
 
 // ───── Context type ───────────────────────────────────────────────────────────
 
@@ -33,6 +33,9 @@ interface AppContextValue {
   // Chat
   addChatMessage: (msg: Omit<ChatMessage, 'id' | 'createdAt'>) => void
   clearChat: () => void
+
+  // Onboarding
+  completeOnboarding: (name: string, avatar: string, authMethod: 'google' | 'apple' | 'email', survey: Survey) => void
 }
 
 const AppContext = createContext<AppContextValue | null>(null)
@@ -180,6 +183,29 @@ export function AppProvider({ children }: { children: ReactNode }) {
     persist({ ...state, chatMessages: [] })
   }, [state, persist])
 
+  const completeOnboarding = useCallback(
+    (name: string, avatar: string, authMethod: 'google' | 'apple' | 'email', survey: Survey) => {
+      // Start from demo data, then override user-1 with the new user's info
+      const demo = createInitialState()
+      const newUser: User = {
+        ...demo.users[0],
+        name,
+        avatar,
+        authMethod,
+        survey,
+        bio: '節約がんばり中💪',
+      }
+      const next: AppState = {
+        ...demo,
+        currentUserId: 'user-1',
+        onboardingCompleted: true,
+        users: [newUser, ...demo.users.slice(1)],
+      }
+      persist(next)
+    },
+    [persist]
+  )
+
   return (
     <AppContext.Provider
       value={{
@@ -194,6 +220,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
         isFollowing,
         addChatMessage,
         clearChat,
+        completeOnboarding,
       }}
     >
       {children}

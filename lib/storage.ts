@@ -1,21 +1,15 @@
-import { AppState, Transaction, Post, User, ChatMessage } from './types'
+import { AppState, User, Transaction, Post } from './types'
 
 const STORAGE_KEY = 'kakeso_v1'
 
 export function getState(): AppState {
-  if (typeof window === 'undefined') return createInitialState()
+  if (typeof window === 'undefined') return createEmptyState()
   try {
     const raw = localStorage.getItem(STORAGE_KEY)
-    if (!raw) {
-      const initial = createInitialState()
-      saveState(initial)
-      return initial
-    }
+    if (!raw) return createEmptyState()
     return JSON.parse(raw) as AppState
   } catch {
-    const initial = createInitialState()
-    saveState(initial)
-    return initial
+    return createEmptyState()
   }
 }
 
@@ -35,6 +29,18 @@ function lastMonthDate(day: number): string {
   d.setMonth(d.getMonth() - 1)
   d.setDate(day)
   return d.toISOString().slice(0, 10)
+}
+
+// Empty state for first-time visitors (before onboarding)
+export function createEmptyState(): AppState {
+  return {
+    currentUserId: '',
+    onboardingCompleted: false,
+    users: [],
+    transactions: [],
+    posts: [],
+    chatMessages: [],
+  }
 }
 
 export function createInitialState(): AppState {
@@ -150,6 +156,7 @@ export function createInitialState(): AppState {
 
   return {
     currentUserId: 'user-1',
+    onboardingCompleted: true,
     users,
     transactions,
     posts,
