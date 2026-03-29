@@ -77,7 +77,7 @@ export default function ProfilePage() {
           </div>
 
           {/* Monthly summary mini */}
-          {isOwn && (
+          {isOwn ? (
             <div className="grid grid-cols-3 gap-2 mt-4">
               <div className="bg-emerald-50 rounded-2xl p-2.5 text-center">
                 <p className="text-xs text-emerald-600 mb-0.5">収入</p>
@@ -98,6 +98,15 @@ export default function ProfilePage() {
                 </p>
               </div>
             </div>
+          ) : (
+            <div className="grid grid-cols-1 gap-2 mt-4">
+              <div className="bg-rose-50 rounded-2xl p-2.5 text-center">
+                <p className="text-xs text-rose-500 mb-0.5">今月の支出</p>
+                <p className="text-sm font-bold text-rose-600">
+                  {(stats.expense / 10000).toFixed(1)}<span className="text-xs">万円</span>
+                </p>
+              </div>
+            </div>
           )}
         </div>
 
@@ -113,7 +122,7 @@ export default function ProfilePage() {
                   : 'border-transparent text-sage-400 hover:text-sage-600'
               }`}
             >
-              {t === 'posts' ? '📝 投稿' : t === 'stats' ? '📊 収支' : '👥 フレンド'}
+              {t === 'posts' ? '📝 投稿' : t === 'stats' ? (isOwn ? '📊 収支' : '📊 支出') : '👥 フレンド'}
             </button>
           ))}
         </div>
@@ -133,8 +142,16 @@ export default function ProfilePage() {
 
           {tab === 'stats' && (
             <div>
-              <p className="text-xs text-sage-500 mb-3 font-medium">{monthLabel}の収支</p>
-              <TransactionList transactions={userTransactions} />
+              <p className="text-xs text-sage-500 mb-3 font-medium">
+                {monthLabel}の{isOwn ? '収支' : '支出'}
+              </p>
+              <TransactionList
+                transactions={
+                  isOwn
+                    ? userTransactions
+                    : userTransactions.filter((t) => t.type === 'expense')
+                }
+              />
             </div>
           )}
 
