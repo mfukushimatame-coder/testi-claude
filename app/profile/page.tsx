@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Header from '@/components/layout/Header'
 import BottomNav from '@/components/layout/BottomNav'
 import PostCard from '@/components/social/PostCard'
@@ -13,6 +13,13 @@ export default function ProfilePage() {
   const { state, currentUser } = useApp()
   const [viewingUserId, setViewingUserId] = useState(state.currentUserId)
   const [tab, setTab] = useState<'posts' | 'stats' | 'users'>('posts')
+
+  // Sync viewingUserId when localStorage state loads (initial state has currentUserId = '')
+  useEffect(() => {
+    if (state.currentUserId && !viewingUserId) {
+      setViewingUserId(state.currentUserId)
+    }
+  }, [state.currentUserId, viewingUserId])
 
   const viewingUser = state.users.find((u) => u.id === viewingUserId)
   const isOwn = viewingUserId === state.currentUserId

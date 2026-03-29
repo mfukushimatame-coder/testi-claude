@@ -9,7 +9,7 @@ import {
   ReactNode,
 } from 'react'
 import { AppState, Transaction, Post, User, Comment, ChatMessage, Survey } from '@/lib/types'
-import { getState, saveState, createInitialState } from '@/lib/storage'
+import { getState, saveState, createInitialState, createEmptyState } from '@/lib/storage'
 
 // ───── Context type ───────────────────────────────────────────────────────────
 
@@ -43,7 +43,13 @@ const AppContext = createContext<AppContextValue | null>(null)
 // ───── Provider ───────────────────────────────────────────────────────────────
 
 export function AppProvider({ children }: { children: ReactNode }) {
-  const [state, setState] = useState<AppState>(() => getState())
+  // Initialize with empty state so server and client render the same HTML (prevents hydration mismatch)
+  const [state, setState] = useState<AppState>(createEmptyState)
+
+  // Load real state from localStorage after hydration
+  useEffect(() => {
+    setState(getState())
+  }, [])
 
   const persist = useCallback((next: AppState) => {
     setState(next)

@@ -15,21 +15,26 @@ export default function ChatPage() {
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const [isTyping, setIsTyping] = useState(false)
   const [lastRecordedTx, setLastRecordedTx] = useState<Transaction | null>(null)
+  const welcomeSentRef = useRef(false)
 
   // Scroll to bottom on new messages
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [state.chatMessages, isTyping])
 
-  // Welcome message on first visit
+  // Welcome message on first visit — wait until localStorage state is loaded (currentUser defined)
   useEffect(() => {
+    if (!currentUser) return
+    if (welcomeSentRef.current) return
+    welcomeSentRef.current = true
     if (state.chatMessages.length === 0) {
       addChatMessage({
         role: 'assistant',
-        content: `こんにちは、${currentUser?.name ?? 'あなた'}！👋\n\nKakeSo（カケソ）へようこそ🌿\n\n**チャットで簡単に家計管理できるよ！**\n\n💰 記録する：\n「ランチ 800円」\n「電車代 210」\n「給料 220000円」\n\n❓ 聞く：\n「今月食費いくら？」\n「節約アドバイス」\n\nまずは今日の支出を入力してみよう😊`,
+        content: `こんにちは、${currentUser.name}！👋\n\nKakeSo（カケソ）へようこそ🌿\n\n**チャットで簡単に家計管理できるよ！**\n\n💰 記録する：\n「ランチ 800円」\n「電車代 210」\n「給料 220000円」\n\n❓ 聞く：\n「今月食費いくら？」\n「節約アドバイス」\n\nまずは今日の支出を入力してみよう😊`,
       })
     }
-  }, [])
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentUser])
 
   const handleSend = async (text: string) => {
     // Add user message
