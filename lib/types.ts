@@ -64,6 +64,48 @@ export interface ChatMessage {
   }
 }
 
+// ── Strava-style continuity features ─────────────────────────────────────────
+
+export interface NoMoneyDay {
+  id: string
+  userId: string
+  date: string // YYYY-MM-DD
+}
+
+export type BadgeType =
+  | 'first_record'
+  | 'streak_3'
+  | 'streak_7'
+  | 'streak_30'
+  | 'nmd_5'
+  | 'nmd_10'
+  | 'save_vs_last_month'
+  | 'first_follower'
+
+export interface UserBadge {
+  userId: string
+  badgeType: BadgeType
+  earnedAt: string
+}
+
+export interface Challenge {
+  id: string
+  title: string
+  description: string
+  type: 'spending_limit' | 'nmd_count' | 'streak'
+  targetValue: number
+  category?: string
+  weekStart: string // YYYY-MM-DD (Monday)
+}
+
+export interface ChallengeParticipant {
+  challengeId: string
+  userId: string
+  joinedAt: string
+}
+
+// ── App state ─────────────────────────────────────────────────────────────────
+
 export interface AppState {
   currentUserId: string
   onboardingCompleted: boolean
@@ -71,4 +113,8 @@ export interface AppState {
   transactions: Transaction[]
   posts: Post[]
   chatMessages: ChatMessage[]
+  noMoneyDays: NoMoneyDay[]
+  badges: UserBadge[]
+  challenges: Challenge[]
+  challengeParticipants: ChallengeParticipant[]
 }

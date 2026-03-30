@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useApp } from '@/context/AppContext'
 import { Survey } from '@/lib/types'
@@ -26,7 +26,8 @@ export default function OnboardingPage() {
   const [step, setStep] = useState<Step>('profile')
   const [name, setName] = useState('')
   const [avatar, setAvatar] = useState('🌿')
-  const [authMethod, setAuthMethod] = useState<'google' | 'apple' | 'email'>('email')
+  const [saving, setSaving] = useState(false)
+  const [saveError, setSaveError] = useState('')
 
   const [survey, setSurvey] = useState<Partial<Survey>>({
     gender: undefined,
@@ -35,17 +36,6 @@ export default function OnboardingPage() {
     appsUsed: undefined,
     dataConsent: false,
   })
-
-  // Load pending auth info from sessionStorage
-  useEffect(() => {
-    const raw = sessionStorage.getItem('pendingAuth')
-    if (raw) {
-      const data = JSON.parse(raw)
-      if (data.authMethod) setAuthMethod(data.authMethod)
-      if (data.name) setName(data.name)
-      if (data.avatar) setAvatar(data.avatar)
-    }
-  }, [])
 
   const stepIndex = step === 'profile' ? 0 : step === 'survey' ? 1 : 2
 
@@ -57,11 +47,18 @@ export default function OnboardingPage() {
     survey.appsUsed &&
     survey.dataConsent
 
-  const handleFinish = () => {
-    sessionStorage.removeItem('pendingAuth')
-    completeOnboarding(name.trim(), avatar, authMethod, survey as Survey)
-    setStep('done')
-    setTimeout(() => router.replace('/chat'), 1800)
+  const handleFinish = async () => {
+    setSaving(true)
+    setSaveError('')
+    try {
+      await completeOnboarding(name.trim(), avatar, 'email', survey as Survey)
+      setStep('done')
+      setTimeout(() => router.replace('/chat'), 1800)
+    } catch (err) {
+      console.error(err)
+      setSaveError('保存に失敗しました。もう一度お試しください。')
+      setSaving(false)
+    }
   }
 
   return (
@@ -90,7 +87,6 @@ export default function OnboardingPage() {
             <p className="text-sm text-sage-500">KakeSoで使う名前とアバターを選んでね</p>
           </div>
 
-          {/* Avatar picker */}
           <div>
             <p className="text-xs font-medium text-sage-600 mb-2">アバターを選ぶ</p>
             <div className="grid grid-cols-6 gap-2">
@@ -110,9 +106,10 @@ export default function OnboardingPage() {
             </div>
           </div>
 
-          {/* Name input */}
           <div>
-            <label className="block text-xs font-medium text-sage-600 mb-1.5">ニックネーム</label>
+            <label className="block text-xs font-medium text-sage-600 mb-1.5">
+              ニックネーム
+            </label>
             <input
               type="text"
               value={name}
@@ -124,7 +121,6 @@ export default function OnboardingPage() {
             />
           </div>
 
-          {/* Preview */}
           {name && (
             <div className="glass rounded-2xl p-4 flex items-center gap-3 fade-in-up">
               <div className="w-12 h-12 rounded-full bg-emerald-50 flex items-center justify-center text-2xl">
@@ -154,7 +150,7 @@ export default function OnboardingPage() {
         <div className="flex-1 flex flex-col gap-5 pb-10 overflow-y-auto">
           <div>
             <h1 className="text-2xl font-bold text-sage-800 mb-1">アンケート</h1>
-            <p className="text-sm text-sage-500">より良いサービスのためにお聞きします（任意）</p>
+            <p className="text-sm text-sage-500">より良いサービスのためにお聞きします</p>
           </div>
 
           {/* Gender */}
@@ -207,14 +203,18 @@ export default function OnboardingPage() {
             >
               <option value="">選択してください</option>
               {PREFECTURES.map((p) => (
-                <option key={p} value={p}>{p}</option>
+                <option key={p} value={p}>
+                  {p}
+                </option>
               ))}
             </select>
           </div>
 
           {/* Apps used */}
           <div>
-            <p className="text-xs font-medium text-sage-600 mb-1">家計簿アプリ・紙の家計簿を今まで何個使ったことがある？</p>
+            <p className="text-xs font-medium text-sage-600 mb-1">
+              家計簿アプリを今まで何個使ったことがある？
+            </p>
             <div className="grid grid-cols-3 gap-2">
               {(['0個', '1個', '2個', '3個', '4個', '5個以上'] as const).map((n) => (
                 <button
@@ -241,19 +241,36 @@ export default function OnboardingPage() {
                 : 'border-sage-200 bg-white'
             }`}
           >
-            <div className={`w-5 h-5 rounded flex-shrink-0 mt-0.5 flex items-center justify-center border-2 transition-all ${
-              survey.dataConsent ? 'bg-emerald-500 border-emerald-500' : 'border-sage-300'
-            }`}>
+            <div
+              className={`w-5 h-5 rounded flex-shrink-0 mt-0.5 flex items-center justify-center border-2 transition-all ${
+                survey.dataConsent ? 'bg-emerald-500 border-emerald-500' : 'border-sage-300'
+              }`}
+            >
               {survey.dataConsent && (
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                <svg
+                  width="12"
+                  height="12"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="white"
+                  strokeWidth="3"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
                   <polyline points="20 6 9 17 4 12" />
                 </svg>
               )}
             </div>
             <p className="text-xs text-sage-600 leading-relaxed">
-              アンケート情報（性別・年代・都道府県・利用歴）を<strong>匿名化した上で第三者に提供すること</strong>に同意します。個人を特定できる情報は一切含まれません。
+              アンケート情報（性別・年代・都道府県・利用歴）を
+              <strong>匿名化した上で第三者に提供すること</strong>
+              に同意します。個人を特定できる情報は一切含まれません。
             </p>
           </button>
+
+          {saveError && (
+            <p className="text-xs text-red-500 bg-red-50 rounded-xl px-3 py-2">{saveError}</p>
+          )}
 
           <div className="flex gap-2">
             <button
@@ -264,10 +281,10 @@ export default function OnboardingPage() {
             </button>
             <button
               onClick={handleFinish}
-              disabled={!canProceedSurvey}
+              disabled={!canProceedSurvey || saving}
               className="flex-1 bg-emerald-500 text-white font-bold py-4 rounded-2xl shadow-md hover:bg-emerald-600 transition-colors active:scale-95 disabled:opacity-40"
             >
-              KakeSoをはじめる 🌿
+              {saving ? '保存中...' : 'KakeSoをはじめる 🌿'}
             </button>
           </div>
         </div>
@@ -281,11 +298,11 @@ export default function OnboardingPage() {
           </div>
           <div>
             <h1 className="text-2xl font-bold text-sage-800 mb-2">
-              {name}さん、<br />ようこそ！🎉
+              {name}さん、
+              <br />
+              ようこそ！🎉
             </h1>
-            <p className="text-sm text-sage-500">
-              KakeSoで節約ライフをはじめよう🌿
-            </p>
+            <p className="text-sm text-sage-500">KakeSoで節約ライフをはじめよう🌿</p>
           </div>
           <div className="flex gap-1">
             {[0, 1, 2].map((i) => (

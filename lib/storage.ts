@@ -40,6 +40,10 @@ export function createEmptyState(): AppState {
     transactions: [],
     posts: [],
     chatMessages: [],
+    noMoneyDays: [],
+    badges: [],
+    challenges: [],
+    challengeParticipants: [],
   }
 }
 
@@ -161,5 +165,9 @@ export function createInitialState(): AppState {
     transactions,
     posts,
     chatMessages: [],
+    noMoneyDays: [],
+    badges: [],
+    challenges: [],
+    challengeParticipants: [],
   }
 }

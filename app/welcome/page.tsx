@@ -3,24 +3,34 @@
 import { useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { getState } from '@/lib/storage'
+import { createClient } from '@/lib/supabase-client'
 
 export default function WelcomePage() {
   const router = useRouter()
 
   useEffect(() => {
-    const state = getState()
-    if (state.onboardingCompleted) {
-      router.replace('/chat')
+    async function checkAuth() {
+      const supabase = createClient()
+      const {
+        data: { user },
+      } = await supabase.auth.getUser()
+      if (!user) return
+
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('id')
+        .eq('id', user.id)
+        .single()
+
+      router.replace(profile ? '/chat' : '/onboarding')
     }
+    checkAuth()
   }, [router])
 
   return (
     <div className="min-h-svh flex flex-col items-center justify-between bg-beige-100 px-6 py-12 max-w-lg mx-auto">
-      {/* Top spacer */}
       <div />
 
-      {/* Logo & tagline */}
       <div className="flex flex-col items-center text-center gap-6">
         <div className="w-24 h-24 rounded-3xl bg-emerald-500 flex items-center justify-center shadow-lg shadow-emerald-200">
           <span className="text-5xl">🌿</span>
@@ -33,20 +43,23 @@ export default function WelcomePage() {
 
         <div className="space-y-2">
           <p className="text-xl font-semibold text-sage-800 leading-snug">
-            チャットで記録、<br />SNSで節約モチベUP📣
+            チャットで記録、
+            <br />
+            SNSで節約モチベUP📣
           </p>
           <p className="text-sm text-sage-500 leading-relaxed">
-            「ランチ 800円」と打つだけで家計簿に記録。<br />
+            「ランチ 800円」と打つだけで家計簿に記録。
+            <br />
             フレンドと節約を楽しもう！
           </p>
         </div>
 
-        {/* Features */}
         <div className="w-full space-y-2 text-left">
           {[
             { icon: '💬', text: 'チャットで気軽に記録' },
             { icon: '📊', text: 'AIが支出を自動分析' },
             { icon: '👥', text: 'フレンドと節約を競い合う' },
+            { icon: '🔥', text: '連続記録でストリーク達成' },
           ].map(({ icon, text }) => (
             <div key={text} className="glass rounded-2xl px-4 py-3 flex items-center gap-3">
               <span className="text-xl">{icon}</span>
@@ -56,7 +69,6 @@ export default function WelcomePage() {
         </div>
       </div>
 
-      {/* CTA */}
       <div className="w-full space-y-3">
         <Link
           href="/auth"

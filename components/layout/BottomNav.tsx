@@ -7,6 +7,7 @@ const NAV_ITEMS = [
   { href: '/chat', label: 'チャット', icon: ChatIcon },
   { href: '/feed', label: 'フィード', icon: FeedIcon },
   { href: '/dashboard', label: '家計簿', icon: DashboardIcon },
+  { href: '/challenge', label: 'チャレンジ', icon: ChallengeIcon },
   { href: '/profile', label: 'マイページ', icon: ProfileIcon },
 ]
 
@@ -67,6 +68,15 @@ function DashboardIcon({ active }: { active: boolean }) {
       <rect x="14" y="3" width="7" height="7" rx="1" />
       <rect x="3" y="14" width="7" height="7" rx="1" />
       <rect x="14" y="14" width="7" height="7" rx="1" />
+    </svg>
+  )
+}
+
+function ChallengeIcon({ active }: { active: boolean }) {
+  return (
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={active ? 2.5 : 2} strokeLinecap="round" strokeLinejoin="round">
+      <path d="M8 21h8M12 17v4M7 4H4a1 1 0 0 0-1 1v4c0 4 3 7 9 7s9-3 9-7V5a1 1 0 0 0-1-1h-3" />
+      <rect x="7" y="2" width="10" height="5" rx="1" />
     </svg>
   )
 }
