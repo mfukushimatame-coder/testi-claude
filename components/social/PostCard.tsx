@@ -32,55 +32,59 @@ export default function PostCard({ post }: Props) {
   const isIncome = post.category === '給与' || post.category === '副業'
 
   return (
-    <div className="glass rounded-3xl p-4 shadow-sm fade-in-up">
+    <div className="bg-white rounded-2xl border border-gray-100 shadow-sm fade-in-up overflow-hidden">
       {/* Header */}
-      <div className="flex items-center justify-between mb-3">
-        <div className="flex items-center gap-2.5">
-          <div className="w-10 h-10 rounded-full bg-beige-100 flex items-center justify-center text-xl">
+      <div className="flex items-center justify-between px-4 pt-4 pb-3">
+        <div className="flex items-center gap-3">
+          <div className="w-9 h-9 rounded-full bg-gray-100 flex items-center justify-center text-lg">
             {post.userAvatar}
           </div>
           <div>
-            <p className="text-sm font-semibold text-sage-800">{post.userName}</p>
-            <p className="text-xs text-sage-400">{timeAgo(post.createdAt)}</p>
+            <p className="text-sm font-semibold text-gray-900 leading-none">{post.userName}</p>
+            <p className="text-xs text-gray-400 mt-0.5">{timeAgo(post.createdAt)}</p>
           </div>
         </div>
         {!isOwn && <FollowButton targetUserId={post.userId} size="sm" />}
       </div>
 
-      {/* Amount badge */}
-      {post.amount != null && (
-        <div className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold mb-2 ${
-          isIncome
-            ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
-            : 'bg-rose-50 text-rose-600 border border-rose-100'
-        }`}>
-          <span>{icon}</span>
-          <span>{post.category}</span>
-          <span className="mx-0.5">·</span>
-          <span>{isIncome ? '+' : '-'}{post.amount.toLocaleString('ja-JP')}円</span>
-        </div>
-      )}
-
       {/* Body */}
-      <p className="text-sm text-sage-700 leading-relaxed whitespace-pre-wrap mb-3">
-        {post.body}
-      </p>
+      <div className="px-4 pb-3">
+        {post.amount != null && (
+          <div className={`inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-xs font-semibold mb-2 ${
+            isIncome
+              ? 'bg-emerald-50 text-emerald-700'
+              : 'bg-red-50 text-red-600'
+          }`}>
+            <span>{icon}</span>
+            <span>{post.category}</span>
+            <span className="opacity-40">|</span>
+            <span>{isIncome ? '+' : '-'}{post.amount.toLocaleString('ja-JP')}円</span>
+          </div>
+        )}
+        <p className="text-sm text-gray-700 leading-relaxed whitespace-pre-wrap">
+          {post.body}
+        </p>
+      </div>
 
       {/* Actions */}
-      <div className="flex items-center gap-4">
+      <div className="flex items-center gap-4 px-4 py-2.5 border-t border-gray-50">
         <button
           onClick={() => toggleLike(post.id)}
           className={`flex items-center gap-1.5 text-sm transition-all active:scale-95 ${
-            liked ? 'text-emerald-600 font-semibold' : 'text-sage-400 hover:text-sage-600'
+            liked ? 'text-emerald-600 font-semibold' : 'text-gray-400 hover:text-gray-600'
           }`}
         >
-          <span className="text-base">{liked ? '💚' : '🤍'}</span>
-          <span>{post.likes.length > 0 ? post.likes.length : ''}</span>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill={liked ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
+          </svg>
+          <span>{post.likes.length > 0 ? post.likes.length : 'いいね'}</span>
         </button>
 
-        <div className="flex items-center gap-1.5 text-sm text-sage-400">
-          <span className="text-base">💬</span>
-          <span>{post.comments.length > 0 ? post.comments.length : ''}</span>
+        <div className="flex items-center gap-1.5 text-sm text-gray-400">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+          </svg>
+          <span>{post.comments.length > 0 ? post.comments.length : 'コメント'}</span>
         </div>
       </div>
 
