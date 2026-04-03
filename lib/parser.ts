@@ -83,16 +83,42 @@ const QUERY_PATTERNS: Array<{ pattern: RegExp; intent: QueryIntent }> = [
   { pattern: /ヘルプ|使い方|help|何ができる/, intent: 'help' },
 ]
 
+// ───── Kanji number conversion ───────────────────────────────────────────────
+
+const KANJI_DIGIT: Record<string, number> = {
+  '〇': 0, '零': 0, '一': 1, '二': 2, '三': 3, '四': 4,
+  '五': 5, '六': 6, '七': 7, '八': 8, '九': 9,
+}
+
+function kanjiToDigits(text: string): string {
+  // Convert patterns like 二万, 三千五百, 一万二千 to arabic
+  return text.replace(
+    /([一二三四五六七八九〇零十百千万]+)/g,
+    (match) => {
+      let total = 0
+      let current = 0
+      for (const ch of match) {
+        if (ch === '万') { total += (current || 1) * 10000; current = 0 }
+        else if (ch === '千') { total += (current || 1) * 1000; current = 0 }
+        else if (ch === '百') { total += (current || 1) * 100; current = 0 }
+        else if (ch === '十') { total += (current || 1) * 10; current = 0 }
+        else if (ch in KANJI_DIGIT) { current = current * 10 + KANJI_DIGIT[ch] }
+      }
+      total += current
+      return total > 0 ? total.toString() : match
+    }
+  )
+}
+
 // ───── Amount extraction ──────────────────────────────────────────────────────
 
 function extractAmount(text: string): number | null {
-  // Match patterns like: 800円, ¥800, 800, 1,500, 1500円, ¥1,500
-  const cleaned = text.replace(/,/g, '')
+  const cleaned = kanjiToDigits(text).replace(/,/g, '')
   const patterns = [
     /[¥￥](\d+(?:\.\d+)?)/,
     /(\d+(?:\.\d+)?)円/,
-    /(\d{3,})/,  // bare number ≥ 3 digits
-    /(\d+)/,     // any number
+    /(\d{3,})/,
+    /(\d+)/,
   ]
   for (const p of patterns) {
     const m = cleaned.match(p)
@@ -125,6 +151,11 @@ function detectCategory(text: string): { category: string; type: TransactionType
     }
   }
 
+  // Explicit expense keyword
+  if (text.includes('支出') || text.includes('出費')) {
+    return { category: 'その他', type: 'expense' }
+  }
+
   return { category: 'その他', type: 'expense' }
 }
 
@@ -144,13 +175,14 @@ function extractMemo(text: string): string {
 // ───── Is-record heuristic ────────────────────────────────────────────────────
 
 function looksLikeRecord(text: string): boolean {
-  // Has a number with ≥ 2 digits (likely an amount)
-  const hasAmount = /\d{2,}/.test(text.replace(/\s/g, ''))
+  // Has a number with ≥ 2 digits OR kanji number (likely an amount)
+  const converted = kanjiToDigits(text)
+  const hasAmount = /\d{2,}/.test(converted.replace(/\s/g, ''))
   // Does NOT look like a question
   const isQuestion =
     text.includes('？') ||
     text.includes('?') ||
-    /^(今月|先月|どの|なんで|いくら|何に|どこ|節約|アドバイス|ヘルプ|使い方|help|教えて|残高|比べ|合計)/.test(text)
+    /^(今月|先月|どの|なんで|いくら|何に|どこ|アドバイス|ヘルプ|使い方|help|教えて|残高|比べ|合計)/.test(text)
   return hasAmount && !isQuestion
 }
 
@@ -160,24 +192,7 @@ export function parseInput(text: string, userId: string): ParseResult {
   const trimmed = text.trim()
   if (!trimmed) return { type: 'unknown' }
 
-  // 1. Try query patterns first (questions take priority)
-  for (const { pattern, intent } of QUERY_PATTERNS) {
-    if (pattern.test(trimmed)) {
-      // Extract category hint for category queries
-      let category: string | undefined
-      if (intent === 'monthly_category' || intent === 'monthly_total') {
-        for (const [kw, cat] of Object.entries(CATEGORY_QUERY_MAP)) {
-          if (trimmed.includes(kw)) {
-            category = cat
-            break
-          }
-        }
-      }
-      return { type: 'query', intent, category }
-    }
-  }
-
-  // 2. Try record detection
+  // 1. If it looks like a record (has amount), try record detection first
   if (looksLikeRecord(trimmed)) {
     const amount = extractAmount(trimmed)
     if (amount !== null) {
@@ -192,10 +207,22 @@ export function parseInput(text: string, userId: string): ParseResult {
     }
   }
 
-  // 3. Check if it's an implicit query (no amount, contains known query words)
-  if (!looksLikeRecord(trimmed)) {
-    return { type: 'query', intent: 'help' }
+  // 2. Try query patterns
+  for (const { pattern, intent } of QUERY_PATTERNS) {
+    if (pattern.test(trimmed)) {
+      let category: string | undefined
+      if (intent === 'monthly_category' || intent === 'monthly_total') {
+        for (const [kw, cat] of Object.entries(CATEGORY_QUERY_MAP)) {
+          if (trimmed.includes(kw)) {
+            category = cat
+            break
+          }
+        }
+      }
+      return { type: 'query', intent, category }
+    }
   }
 
-  return { type: 'unknown' }
+  // 3. No amount and no matching query pattern → help
+  return { type: 'query', intent: 'help' }
 }
