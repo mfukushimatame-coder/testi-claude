@@ -5,12 +5,14 @@ import Header from '@/components/layout/Header'
 import BottomNav from '@/components/layout/BottomNav'
 import PostCard from '@/components/social/PostCard'
 import { useApp } from '@/context/AppContext'
+import { parseInput } from '@/lib/parser'
 
 export default function FeedPage() {
-  const { state, addPost, currentUser } = useApp()
+  const { state, addPost, addTransaction, currentUser } = useApp()
   const [tab, setTab] = useState<'all' | 'following'>('all')
   const [showCompose, setShowCompose] = useState(false)
   const [composeText, setComposeText] = useState('')
+  const [recordedInfo, setRecordedInfo] = useState<string>('')
 
   const followingIds = currentUser?.following ?? []
 
@@ -25,15 +27,50 @@ export default function FeedPage() {
         )
       : posts
 
-  const handlePost = () => {
+  // テキストが変わるたびに家計簿記録できるか判定してプレビュー表示
+  const handleComposeChange = (text: string) => {
+    setComposeText(text)
+    if (!text.trim()) { setRecordedInfo(''); return }
+    const result = parseInput(text, state.currentUserId)
+    if (result.type === 'record' && result.transaction.amount) {
+      const typeLabel = result.transaction.type === 'income' ? '収入' : '支出'
+      setRecordedInfo(`💰 家計簿にも記録：${result.transaction.category} ${result.transaction.amount.toLocaleString('ja-JP')}円（${typeLabel}）`)
+    } else {
+      setRecordedInfo('')
+    }
+  }
+
+  const handlePost = async () => {
     if (!composeText.trim() || !currentUser) return
+
+    // 金額が含まれていれば家計簿にも自動記録
+    const result = parseInput(composeText.trim(), state.currentUserId)
+    let transactionId: string | undefined
+    let amount: number | undefined
+    let category: string | undefined
+
+    if (result.type === 'record' && result.transaction.amount) {
+      try {
+        const tx = await addTransaction(result.transaction)
+        transactionId = tx.id
+        amount = tx.amount
+        category = tx.category
+      } catch (e) {
+        console.error(e)
+      }
+    }
+
     addPost({
       userId: currentUser.id,
       userName: currentUser.name,
       userAvatar: currentUser.avatar,
       body: composeText.trim(),
+      transactionId,
+      amount,
+      category,
     })
     setComposeText('')
+    setRecordedInfo('')
     setShowCompose(false)
   }
 
@@ -60,11 +97,14 @@ export default function FeedPage() {
         <div className="glass border-b border-white/50 px-4 py-3">
           <textarea
             value={composeText}
-            onChange={(e) => setComposeText(e.target.value)}
-            placeholder="今日の節約・支出をシェアしよう！"
+            onChange={(e) => handleComposeChange(e.target.value)}
+            placeholder={'今日の節約・支出をシェアしよう！\n例：「ランチ 800円 節約できた！」\n　　→ 投稿と同時に家計簿にも記録されるよ💰'}
             className="w-full bg-beige-50 rounded-2xl px-4 py-3 text-sm text-sage-700 placeholder-sage-400 outline-none resize-none"
             rows={3}
           />
+          {recordedInfo && (
+            <p className="text-xs text-emerald-600 bg-emerald-50 rounded-xl px-3 py-2 mt-2">{recordedInfo}</p>
+          )}
           <div className="flex justify-end gap-2 mt-2">
             <button
               onClick={() => setShowCompose(false)}
@@ -74,7 +114,7 @@ export default function FeedPage() {
             </button>
             <button
               onClick={handlePost}
-              disabled={!composeText.trim()}
+              disabled={!composeText.trim() || !currentUser}
               className="text-sm bg-emerald-500 text-white px-4 py-1.5 rounded-full font-semibold hover:bg-emerald-600 transition-colors disabled:opacity-40"
             >
               投稿
