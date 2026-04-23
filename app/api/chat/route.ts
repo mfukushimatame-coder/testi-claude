@@ -10,10 +10,25 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const { message, context } = await request.json()
+    const body = await request.json()
+    const { message, context } = body
+
+    // Input validation
+    if (!message || typeof message !== 'string') {
+      return NextResponse.json({ error: 'Invalid message' }, { status: 400 })
+    }
+    if (message.length > 500) {
+      return NextResponse.json({ error: 'Message too long' }, { status: 400 })
+    }
+
     const { transactions, currentUserId } = context as {
       transactions: Transaction[]
       currentUserId: string
+    }
+
+    // Verify the user can only access their own data
+    if (currentUserId !== user.id) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
     // Build monthly context

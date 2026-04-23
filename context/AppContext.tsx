@@ -320,7 +320,10 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
   const deleteTransaction = useCallback((id: string) => {
     const supabase = createClient()
-    supabase.from('transactions').delete().eq('id', id)
+    const userId = supabase.auth.getUser().then(({ data }) => {
+      if (!data.user) return
+      supabase.from('transactions').delete().eq('id', id).eq('user_id', data.user.id)
+    })
     setState((prev) => ({
       ...prev,
       transactions: prev.transactions.filter((t) => t.id !== id),
