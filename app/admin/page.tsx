@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import { createAdminClient, hasServiceRole } from '@/lib/supabase-admin'
+import AnalysisSection from './AnalysisSection'
 
 type Period = 'today' | 'week' | 'month' | 'all'
 
@@ -138,8 +139,11 @@ export default async function AdminPage({
         </div>
       </div>
 
+      {/* Analysis section */}
+      <AnalysisSection />
+
       {/* Recent users */}
-      <div className="bg-white rounded-xl border border-gray-100">
+      <div className="bg-white rounded-xl border border-gray-100 mt-8">
         <div className="px-4 py-3 border-b border-gray-100">
           <h2 className="text-sm font-semibold text-gray-900">最近の登録者</h2>
         </div>
