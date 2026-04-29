@@ -21,6 +21,7 @@ import {
   BadgeType,
   Challenge,
   ChallengeParticipant,
+  BudgetGoal,
 } from '@/lib/types'
 import { createClient } from '@/lib/supabase-client'
 
@@ -38,6 +39,7 @@ function createEmptyState(): AppState {
     badges: [],
     challenges: [],
     challengeParticipants: [],
+    budgetGoals: [],
   }
 }
 
@@ -85,6 +87,9 @@ interface AppContextValue {
 
   // Challenges
   joinChallenge: (challengeId: string) => void
+
+  // Budget goals
+  setBudgetGoal: (category: string, amount: number) => Promise<void>
 }
 
 const AppContext = createContext<AppContextValue | null>(null)
@@ -145,6 +150,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
         { data: badgesData },
         { data: challenges },
         { data: participants },
+        { data: budgetGoalsData },
       ] = await Promise.all([
         supabase.from('profiles').select('*'),
         supabase
@@ -169,6 +175,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
         supabase.from('user_badges').select('*').eq('user_id', user.id),
         supabase.from('challenges').select('*').order('week_start', { ascending: false }),
         supabase.from('challenge_participants').select('*'),
+        supabase.from('budget_goals').select('*').eq('user_id', user.id),
       ])
 
       const safeProfiles = profiles || []
@@ -279,6 +286,13 @@ export function AppProvider({ children }: { children: ReactNode }) {
         badges: mappedBadges,
         challenges: mappedChallenges,
         challengeParticipants: mappedParticipants,
+        budgetGoals: (budgetGoalsData || []).map((g) => ({
+          id: g.id,
+          userId: g.user_id,
+          category: g.category,
+          amount: Number(g.amount),
+          month: g.month,
+        })),
       })
       setIsLoading(false)
     }
@@ -575,6 +589,56 @@ export function AppProvider({ children }: { children: ReactNode }) {
     []
   )
 
+  // ── Budget Goals ──────────────────────────────────────────────────────────────
+
+  const setBudgetGoal = useCallback(async (category: string, amount: number): Promise<void> => {
+    const supabase = createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return
+
+    const month = new Date().toISOString().slice(0, 7)
+
+    if (amount <= 0) {
+      await supabase.from('budget_goals')
+        .delete()
+        .eq('user_id', user.id)
+        .eq('category', category)
+        .eq('month', month)
+      setState((prev) => ({
+        ...prev,
+        budgetGoals: prev.budgetGoals.filter(
+          (g) => !(g.userId === user.id && g.category === category && g.month === month)
+        ),
+      }))
+      return
+    }
+
+    const { data, error } = await supabase
+      .from('budget_goals')
+      .upsert(
+        { user_id: user.id, category, amount, month },
+        { onConflict: 'user_id,category,month' }
+      )
+      .select()
+      .single()
+
+    if (!error && data) {
+      const goal: BudgetGoal = {
+        id: data.id, userId: data.user_id, category: data.category,
+        amount: Number(data.amount), month: data.month,
+      }
+      setState((prev) => ({
+        ...prev,
+        budgetGoals: [
+          goal,
+          ...prev.budgetGoals.filter(
+            (g) => !(g.userId === user.id && g.category === category && g.month === month)
+          ),
+        ],
+      }))
+    }
+  }, [])
+
   // ── NMD (No-Money-Day) ────────────────────────────────────────────────────────
 
   const recordNMD = useCallback(async (): Promise<void> => {
@@ -711,6 +775,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
         getCurrentStreak,
         awardBadgeIfNeeded,
         joinChallenge,
+        setBudgetGoal,
       }}
     >
       {children}

@@ -172,6 +172,41 @@ export default function ChatPage() {
         role: 'assistant',
         content: `✅ **${result.transaction.category}（${result.transaction.memo}）** として ${amountStr}円を${typeLabel}に記録したよ！\n\nダッシュボードで確認できるよ📊`,
       })
+
+      // Budget goal warning
+      if (result.transaction.type === 'expense') {
+        const monthKey = new Date().toISOString().slice(0, 7)
+        const goal = state.budgetGoals.find(
+          (g) =>
+            g.userId === state.currentUserId &&
+            g.category === result.transaction.category &&
+            g.month === monthKey
+        )
+        if (goal) {
+          const prevSpent = state.transactions
+            .filter(
+              (t) =>
+                t.userId === state.currentUserId &&
+                t.category === goal.category &&
+                t.date.startsWith(monthKey) &&
+                t.type === 'expense'
+            )
+            .reduce((s, t) => s + t.amount, 0)
+          const totalSpent = prevSpent + result.transaction.amount
+          if (totalSpent > goal.amount) {
+            addChatMessage({
+              role: 'assistant',
+              content: `⚠️ 今月の**${goal.category}**が目標の **¥${goal.amount.toLocaleString('ja-JP')}** を超えました（現在 ¥${totalSpent.toLocaleString('ja-JP')}）。ダッシュボードで見直してみよう！`,
+            })
+          } else if (totalSpent >= goal.amount * 0.8) {
+            const remaining = goal.amount - totalSpent
+            addChatMessage({
+              role: 'assistant',
+              content: `📊 今月の**${goal.category}**が目標の80%に達したよ。残り **¥${remaining.toLocaleString('ja-JP')}** で抑えよう！`,
+            })
+          }
+        }
+      }
     } else if (result.type === 'query') {
       setIsTyping(true)
       try {

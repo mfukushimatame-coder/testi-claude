@@ -104,6 +104,16 @@ export interface ChallengeParticipant {
   joinedAt: string
 }
 
+// ── Budget goals ──────────────────────────────────────────────────────────────
+
+export interface BudgetGoal {
+  id: string
+  userId: string
+  category: string
+  amount: number
+  month: string // 'YYYY-MM'
+}
+
 // ── App state ─────────────────────────────────────────────────────────────────
 
 export interface AppState {
@@ -117,4 +127,5 @@ export interface AppState {
   badges: UserBadge[]
   challenges: Challenge[]
   challengeParticipants: ChallengeParticipant[]
+  budgetGoals: BudgetGoal[]
 }
