@@ -123,7 +123,7 @@ export default function ChallengePage() {
 
   return (
     <div className="flex flex-col h-svh max-w-lg mx-auto">
-      <Header title="チャレンジ 🏆" subtitle="継続・記録・節約" />
+      <Header title="チャレンジ" />
 
       <div className="flex-1 overflow-y-auto px-4 py-4 space-y-4 pb-4">
         {/* Streak card */}

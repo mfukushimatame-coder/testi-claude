@@ -283,14 +283,14 @@ export default function ChatPage() {
 
   return (
     <div className="flex flex-col h-svh max-w-lg mx-auto">
-      <Header title="KakeSo 🌿" subtitle="チャットで記録・分析" />
+      <Header title="KakeSo" />
 
       {/* Streak banner */}
       {streak > 0 && (
-        <div className="flex items-center justify-center gap-2 py-1.5 bg-gradient-to-r from-emerald-50 to-amber-50 border-b border-sage-100 text-xs font-semibold text-sage-700">
-          <span>🔥</span>
-          <span>{streak}日連続記録中！</span>
-          {streak >= 7 && <span className="text-amber-500">すごい！</span>}
+        <div className="flex items-center justify-center gap-2 py-1.5 bg-gray-900 text-xs font-semibold text-white">
+          <span className="tabular-nums">{streak}日連続</span>
+          <span className="text-gray-400 font-normal">記録中</span>
+          {streak >= 7 && <span className="text-emerald-400">— {streak >= 30 ? '30日達成' : '7日達成'}</span>}
         </div>
       )}
 
@@ -335,17 +335,16 @@ export default function ChatPage() {
         <div className="px-4 pb-2">
           <button
             onClick={handleNMD}
-            className="w-full flex items-center justify-center gap-2 py-3 rounded-2xl border-2 border-dashed border-emerald-300 bg-emerald-50 hover:bg-emerald-100 transition-colors text-sm font-semibold text-emerald-700 active:scale-95"
+            className="w-full flex items-center justify-center gap-2 py-3 rounded-2xl border border-gray-200 bg-white hover:bg-gray-50 transition-colors text-sm font-medium text-gray-600 active:scale-95"
           >
-            <span className="text-lg">💰</span>
-            今日はお金を使わなかった！（NMD）
+            今日はお金を使わなかった
           </button>
         </div>
       )}
 
       <ChatInput onSend={handleSend} disabled={isTyping} />
 
-      <div className="h-16" />
+      <div className="h-24" />
       <BottomNav />
     </div>
   )

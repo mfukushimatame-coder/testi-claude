@@ -77,8 +77,7 @@ export default function FeedPage() {
   return (
     <div className="flex flex-col min-h-svh max-w-lg mx-auto">
       <Header
-        title="フィード 📣"
-        subtitle="みんなの節約をチェック"
+        title="フィード"
         right={
           <button
             onClick={() => setShowCompose(!showCompose)}
@@ -141,14 +140,13 @@ export default function FeedPage() {
       </div>
 
       {/* Posts */}
-      <main className="flex-1 px-4 py-4 space-y-3 pb-24">
+      <main className="flex-1 px-4 py-4 space-y-3 pb-32">
         {filteredPosts.length === 0 ? (
           <div className="text-center py-12">
-            <p className="text-4xl mb-3">🌱</p>
-            <p className="text-sm text-sage-500">
+            <p className="text-sm text-gray-400">
               {tab === 'following'
-                ? 'フォロー中のユーザーの投稿がないよ。\nフィードで誰かをフォローしよう！'
-                : 'まだ投稿がないよ。最初の投稿をしてみよう！'}
+                ? 'フォロー中のユーザーの投稿がありません'
+                : 'まだ投稿がありません'}
             </p>
           </div>
         ) : (

@@ -33,19 +33,18 @@ export default function DashboardPage() {
   return (
     <div className="flex flex-col min-h-svh max-w-lg mx-auto">
       <Header
-        title="家計簿 📊"
-        subtitle={monthLabel}
+        title="家計簿"
         right={
           <button
             onClick={() => setShowPrev(!showPrev)}
-            className="text-xs bg-white border border-sage-200 text-sage-600 rounded-full px-3 py-1.5 hover:bg-sage-50 transition-colors"
+            className="text-xs bg-white border border-gray-200 text-gray-600 rounded-full px-3 py-1.5 hover:bg-gray-50 transition-colors font-medium"
           >
-            {showPrev ? '今月' : '先月'}に切替
+            {showPrev ? '今月' : '先月'}
           </button>
         }
       />
 
-      <main className="flex-1 px-4 py-4 space-y-4 pb-24">
+      <main className="flex-1 px-4 py-4 space-y-4 pb-32">
         <MonthlySummary stats={stats} monthLabel={monthLabel} />
         <ExpenseChart stats={stats} />
         {!showPrev && (
