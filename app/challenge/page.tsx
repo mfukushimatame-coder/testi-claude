@@ -74,6 +74,31 @@ function getWeekProgress(
 export default function ChallengePage() {
   const { state, currentUser, joinChallenge, getCurrentStreak } = useApp()
 
+  // useMemo must be called unconditionally (Rules of Hooks)
+  const friendStreaks = useMemo(() => {
+    if (!currentUser) return []
+    return state.users
+      .filter((u) => u.id !== currentUser.id)
+      .map((u) => {
+        const activeDates = new Set([
+          ...state.transactions.filter((t) => t.userId === u.id).map((t) => t.date),
+          ...state.noMoneyDays.filter((n) => n.userId === u.id).map((n) => n.date),
+        ])
+        let s = 0
+        const today = new Date()
+        for (let i = 0; i < 365; i++) {
+          const d = new Date(today)
+          d.setDate(today.getDate() - i)
+          const key = d.toISOString().split('T')[0]
+          if (activeDates.has(key)) s++
+          else break
+        }
+        return { user: u, streak: s }
+      })
+      .sort((a, b) => b.streak - a.streak)
+      .slice(0, 5)
+  }, [state.users, state.transactions, state.noMoneyDays, currentUser])
+
   if (!currentUser) return null
 
   const streak = getCurrentStreak()
@@ -96,30 +121,6 @@ export default function ChallengePage() {
       n.date <= weekEnd.toISOString().split('T')[0]
     )
   }).length
-
-  // Friends' streaks for leaderboard
-  const friendStreaks = useMemo(() => {
-    return state.users
-      .filter((u) => u.id !== currentUser.id)
-      .map((u) => {
-        const activeDates = new Set([
-          ...state.transactions.filter((t) => t.userId === u.id).map((t) => t.date),
-          ...state.noMoneyDays.filter((n) => n.userId === u.id).map((n) => n.date),
-        ])
-        let s = 0
-        const today = new Date()
-        for (let i = 0; i < 365; i++) {
-          const d = new Date(today)
-          d.setDate(today.getDate() - i)
-          const key = d.toISOString().split('T')[0]
-          if (activeDates.has(key)) s++
-          else break
-        }
-        return { user: u, streak: s }
-      })
-      .sort((a, b) => b.streak - a.streak)
-      .slice(0, 5)
-  }, [state.users, state.transactions, state.noMoneyDays, currentUser.id])
 
   return (
     <div className="flex flex-col h-svh max-w-lg mx-auto">

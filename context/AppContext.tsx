@@ -297,7 +297,10 @@ export function AppProvider({ children }: { children: ReactNode }) {
       setIsLoading(false)
     }
 
-    loadData()
+    loadData().catch((err) => {
+      console.error('loadData failed:', err)
+      setIsLoading(false)
+    })
   }, [])
 
   const currentUser = state.users.find((u) => u.id === state.currentUserId)
