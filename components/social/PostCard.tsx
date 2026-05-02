@@ -4,6 +4,7 @@ import { Post } from '@/lib/types'
 import { useApp } from '@/context/AppContext'
 import CommentList from './CommentList'
 import FollowButton from './FollowButton'
+import Link from 'next/link'
 
 const CATEGORY_ICONS: Record<string, string> = {
   '食費': '🍱', '交通費': '🚃', '娯楽費': '🎮', '日用品': '🧴',
@@ -35,7 +36,10 @@ export default function PostCard({ post }: Props) {
     <div className="bg-white rounded-2xl border border-gray-100 shadow-sm fade-in-up overflow-hidden">
       {/* Header */}
       <div className="flex items-center justify-between px-4 pt-4 pb-3">
-        <div className="flex items-center gap-3">
+        <Link
+          href={isOwn ? '/profile' : `/profile/${post.userId}`}
+          className="flex items-center gap-3 active:opacity-70 transition-opacity"
+        >
           <div className="w-9 h-9 rounded-full bg-gray-100 flex items-center justify-center text-lg">
             {post.userAvatar}
           </div>
@@ -43,7 +47,7 @@ export default function PostCard({ post }: Props) {
             <p className="text-sm font-semibold text-gray-900 leading-none">{post.userName}</p>
             <p className="text-xs text-gray-400 mt-0.5">{timeAgo(post.createdAt)}</p>
           </div>
-        </div>
+        </Link>
         {!isOwn && <FollowButton targetUserId={post.userId} size="sm" />}
       </div>
 

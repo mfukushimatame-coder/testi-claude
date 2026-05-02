@@ -6,6 +6,7 @@ import BottomNav from '@/components/layout/BottomNav'
 import MonthlySummary from '@/components/budget/MonthlySummary'
 import ExpenseChart from '@/components/budget/ExpenseChart'
 import TransactionList from '@/components/budget/TransactionList'
+import BudgetGoalSection from '@/components/budget/BudgetGoalSection'
 import { useApp } from '@/context/AppContext'
 import { getMonthlyStats, getCurrentMonthKey, getPreviousMonthKey } from '@/lib/analyzer'
 
@@ -47,6 +48,9 @@ export default function DashboardPage() {
       <main className="flex-1 px-4 py-4 space-y-4 pb-24">
         <MonthlySummary stats={stats} monthLabel={monthLabel} />
         <ExpenseChart stats={stats} />
+        {!showPrev && (
+          <BudgetGoalSection monthKey={thisMonthKey} categoryBreakdown={stats.categoryBreakdown} />
+        )}
 
         <div>
           <p className="text-xs font-semibold text-sage-600 mb-2 px-1">

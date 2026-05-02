@@ -44,6 +44,7 @@ export function createEmptyState(): AppState {
     badges: [],
     challenges: [],
     challengeParticipants: [],
+    budgetGoals: [],
   }
 }
 
@@ -169,5 +170,6 @@ export function createInitialState(): AppState {
     badges: [],
     challenges: [],
     challengeParticipants: [],
+    budgetGoals: [],
   }
 }
