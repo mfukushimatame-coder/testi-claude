@@ -14,7 +14,7 @@ import { createClient } from '@/lib/supabase-client'
 const AVATARS = ['🌿', '🌸', '🦋', '🌻', '🍀', '🌈', '⭐', '🎯', '🦁', '🐬', '🦊', '🐧']
 
 export default function ProfilePage() {
-  const { state, currentUser } = useApp()
+  const { state, currentUser, isLoading } = useApp()
   const router = useRouter()
   const [tab, setTab] = useState<'posts' | 'stats' | 'friends'>('posts')
   const [showAvatarPicker, setShowAvatarPicker] = useState(false)
@@ -41,6 +41,17 @@ export default function ProfilePage() {
     router.push('/auth')
   }
 
+  if (isLoading) return (
+    <div className="flex flex-col min-h-svh max-w-lg mx-auto">
+      <Header title="マイページ" />
+      <div className="flex-1 flex items-center justify-center">
+        <div className="flex gap-1.5">
+          {[0,1,2].map(i => <span key={i} className="w-2 h-2 bg-gray-300 rounded-full animate-bounce" style={{animationDelay:`${i*0.15}s`}} />)}
+        </div>
+      </div>
+      <BottomNav />
+    </div>
+  )
   if (!currentUser) return null
 
   return (

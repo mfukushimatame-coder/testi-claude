@@ -138,50 +138,43 @@ export function AppProvider({ children }: { children: ReactNode }) {
         return
       }
 
-      const [
-        { data: profiles },
-        { data: transactions },
-        { data: posts },
-        { data: likes },
-        { data: comments },
-        { data: follows },
-        { data: chats },
-        { data: nmds },
-        { data: badgesData },
-        { data: challenges },
-        { data: participants },
-        { data: budgetGoalsData },
-      ] = await Promise.all([
+      const results = await Promise.allSettled([
         supabase.from('profiles').select('*'),
-        supabase
-          .from('transactions')
-          .select('*')
-          .eq('user_id', user.id)
-          .order('created_at', { ascending: false }),
+        supabase.from('transactions').select('*').eq('user_id', user.id).order('created_at', { ascending: false }),
         supabase.from('posts').select('*').order('created_at', { ascending: false }),
         supabase.from('post_likes').select('*'),
         supabase.from('post_comments').select('*').order('created_at'),
         supabase.from('follows').select('*'),
-        supabase
-          .from('chat_messages')
-          .select('*')
-          .eq('user_id', user.id)
-          .order('created_at'),
-        supabase
-          .from('no_money_days')
-          .select('*')
-          .eq('user_id', user.id)
-          .order('date', { ascending: false }),
+        supabase.from('chat_messages').select('*').eq('user_id', user.id).order('created_at'),
+        supabase.from('no_money_days').select('*').eq('user_id', user.id).order('date', { ascending: false }),
         supabase.from('user_badges').select('*').eq('user_id', user.id),
         supabase.from('challenges').select('*').order('week_start', { ascending: false }),
         supabase.from('challenge_participants').select('*'),
         supabase.from('budget_goals').select('*').eq('user_id', user.id),
       ])
 
-      const safeProfiles = profiles || []
-      const safeLikes = likes || []
-      const safeComments = comments || []
-      const safeFollows = follows || []
+      const safeData = <T,>(i: number): T[] => {
+        const r = results[i]
+        return r.status === 'fulfilled' ? (r.value.data as T[]) ?? [] : []
+      }
+
+      const profiles = safeData<any>(0)
+      const transactions = safeData<any>(1)
+      const posts = safeData<any>(2)
+      const likes = safeData<any>(3)
+      const comments = safeData<any>(4)
+      const follows = safeData<any>(5)
+      const chats = safeData<any>(6)
+      const nmds = safeData<any>(7)
+      const badgesData = safeData<any>(8)
+      const challenges = safeData<any>(9)
+      const participants = safeData<any>(10)
+      const budgetGoalsData = safeData<any>(11)
+
+      const safeProfiles = profiles
+      const safeLikes = likes
+      const safeComments = comments
+      const safeFollows = follows
 
       // Map users
       const users: User[] = safeProfiles.map((p) => ({
@@ -214,7 +207,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       )
 
       // Map posts
-      const mappedPosts: Post[] = (posts || []).map((p) => {
+      const mappedPosts: Post[] = posts.map((p) => {
         const profile = safeProfiles.find((pr) => pr.id === p.user_id)
         const postLikes = safeLikes
           .filter((l) => l.post_id === p.id)
@@ -240,21 +233,21 @@ export function AppProvider({ children }: { children: ReactNode }) {
       })
 
       // Map NMDs
-      const mappedNMDs: NoMoneyDay[] = (nmds || []).map((n) => ({
+      const mappedNMDs: NoMoneyDay[] = nmds.map((n) => ({
         id: n.id,
         userId: n.user_id,
         date: n.date,
       }))
 
       // Map badges
-      const mappedBadges: UserBadge[] = (badgesData || []).map((b) => ({
+      const mappedBadges: UserBadge[] = badgesData.map((b) => ({
         userId: b.user_id,
         badgeType: b.badge_type as BadgeType,
         earnedAt: b.earned_at,
       }))
 
       // Map challenges
-      const mappedChallenges: Challenge[] = (challenges || []).map((c) => ({
+      const mappedChallenges: Challenge[] = challenges.map((c) => ({
         id: c.id,
         title: c.title,
         description: c.description || '',
@@ -265,7 +258,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       }))
 
       // Map participants
-      const mappedParticipants: ChallengeParticipant[] = (participants || []).map(
+      const mappedParticipants: ChallengeParticipant[] = participants.map(
         (p) => ({
           challengeId: p.challenge_id,
           userId: p.user_id,
@@ -279,14 +272,14 @@ export function AppProvider({ children }: { children: ReactNode }) {
         currentUserId: user.id,
         onboardingCompleted: hasProfile,
         users,
-        transactions: (transactions || []).map(mapTransaction),
+        transactions: transactions.map(mapTransaction),
         posts: mappedPosts,
-        chatMessages: (chats || []).map(mapChatMessage),
+        chatMessages: chats.map(mapChatMessage),
         noMoneyDays: mappedNMDs,
         badges: mappedBadges,
         challenges: mappedChallenges,
         challengeParticipants: mappedParticipants,
-        budgetGoals: (budgetGoalsData || []).map((g) => ({
+        budgetGoals: budgetGoalsData.map((g) => ({
           id: g.id,
           userId: g.user_id,
           category: g.category,

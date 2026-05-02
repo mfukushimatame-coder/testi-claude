@@ -72,7 +72,7 @@ function getWeekProgress(
 // ─── Component ────────────────────────────────────────────────────────────────
 
 export default function ChallengePage() {
-  const { state, currentUser, joinChallenge, getCurrentStreak } = useApp()
+  const { state, currentUser, isLoading, joinChallenge, getCurrentStreak } = useApp()
 
   // useMemo must be called unconditionally (Rules of Hooks)
   const friendStreaks = useMemo(() => {
@@ -99,6 +99,17 @@ export default function ChallengePage() {
       .slice(0, 5)
   }, [state.users, state.transactions, state.noMoneyDays, currentUser])
 
+  if (isLoading) return (
+    <div className="flex flex-col h-svh max-w-lg mx-auto">
+      <Header title="チャレンジ" />
+      <div className="flex-1 flex items-center justify-center">
+        <div className="flex gap-1.5">
+          {[0,1,2].map(i => <span key={i} className="w-2 h-2 bg-gray-300 rounded-full animate-bounce" style={{animationDelay:`${i*0.15}s`}} />)}
+        </div>
+      </div>
+      <BottomNav />
+    </div>
+  )
   if (!currentUser) return null
 
   const streak = getCurrentStreak()
