@@ -8,14 +8,14 @@ import { useApp } from '@/context/AppContext'
 // ─── Badge catalog ────────────────────────────────────────────────────────────
 
 const BADGE_CATALOG = [
-  { type: 'first_record', label: 'はじめの一歩', icon: '🌱', desc: '初めての記録' },
-  { type: 'streak_3', label: '3日連続', icon: '🔥', desc: '3日連続記録' },
-  { type: 'streak_7', label: '7日連続', icon: '🔥🔥', desc: '7日連続記録' },
-  { type: 'streak_30', label: '30日連続', icon: '💎', desc: '30日連続記録' },
-  { type: 'nmd_5', label: 'ノーマネー5回', icon: '💰', desc: 'NMD 5回達成' },
-  { type: 'nmd_10', label: 'ノーマネー10回', icon: '💰💰', desc: 'NMD 10回達成' },
-  { type: 'save_vs_last_month', label: '節約成功', icon: '📉', desc: '先月より支出が少ない' },
-  { type: 'first_follower', label: 'はじめのフレンド', icon: '👥', desc: '初めてフォロー' },
+  { type: 'first_record', label: 'はじめの一歩', desc: '初めての記録' },
+  { type: 'streak_3', label: '3日連続', desc: '3日連続記録' },
+  { type: 'streak_7', label: '7日連続', desc: '7日連続記録' },
+  { type: 'streak_30', label: '30日連続', desc: '30日連続記録' },
+  { type: 'nmd_5', label: 'ノーマネー5回', desc: 'NMD 5回達成' },
+  { type: 'nmd_10', label: 'ノーマネー10回', desc: 'NMD 10回達成' },
+  { type: 'save_vs_last_month', label: '節約成功', desc: '先月より支出が少ない' },
+  { type: 'first_follower', label: 'はじめのフレンド', desc: '初めてフォロー' },
 ] as const
 
 // ─── Weekly challenge helpers ─────────────────────────────────────────────────
@@ -127,18 +127,19 @@ export default function ChallengePage() {
 
       <div className="flex-1 overflow-y-auto px-4 py-4 space-y-4 pb-4">
         {/* Streak card */}
-        <div className="glass rounded-3xl p-5 bg-gradient-to-br from-amber-50 to-emerald-50">
+        <div className="bg-gray-900 rounded-2xl p-5 text-white">
           <div className="flex items-center gap-4">
-            <div className="text-5xl">{streak >= 7 ? '🔥🔥' : streak >= 3 ? '🔥' : '⭐'}</div>
+            <div className="w-16 h-16 rounded-xl bg-white/10 flex items-center justify-center">
+              <span className="text-2xl font-bold tabular-nums">{streak}</span>
+            </div>
             <div>
-              <p className="text-3xl font-bold text-sage-800">{streak}日</p>
-              <p className="text-sm text-sage-500">連続記録ストリーク</p>
+              <p className="text-3xl font-bold tabular-nums">{streak}<span className="text-lg font-normal text-gray-400 ml-1">日</span></p>
+              <p className="text-sm text-gray-400">連続記録ストリーク</p>
             </div>
           </div>
-          <div className="mt-3 flex gap-3 text-xs text-sage-500">
-            <span>💰 NMD通算: {nmdCount}回</span>
-            <span>|</span>
-            <span>💰 今週のNMD: {thisWeekNMD}回</span>
+          <div className="mt-3 flex gap-4 text-xs text-gray-500">
+            <span>NMD通算: <span className="text-white font-medium">{nmdCount}回</span></span>
+            <span>今週のNMD: <span className="text-white font-medium">{thisWeekNMD}回</span></span>
           </div>
         </div>
 
@@ -157,8 +158,8 @@ export default function ChallengePage() {
                       : 'bg-sage-50 border-2 border-sage-100 opacity-40'
                   }`}
                 >
-                  <span className="text-2xl">{earned ? badge.icon : '🔒'}</span>
-                  <span className="text-xs text-sage-600 leading-tight">{badge.label}</span>
+                  <span className={`text-[10px] font-bold tracking-wider uppercase ${earned ? 'text-emerald-600' : 'text-gray-400'}`}>{earned ? 'GET' : '---'}</span>
+                  <span className="text-xs text-gray-600 leading-tight">{badge.label}</span>
                 </div>
               )
             })}
@@ -170,7 +171,7 @@ export default function ChallengePage() {
           <h2 className="text-sm font-bold text-sage-700 mb-2 px-1">今週のチャレンジ</h2>
           {thisWeekChallenges.length === 0 ? (
             <div className="glass rounded-2xl p-4 text-center text-sm text-sage-400">
-              今週のチャレンジはまだないよ。<br />記録を続けてね！🌿
+              今週のチャレンジはまだありません。記録を続けてください。
             </div>
           ) : (
             <div className="space-y-2">
