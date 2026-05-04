@@ -52,7 +52,10 @@ export default function ProfilePage() {
       <BottomNav />
     </div>
   )
-  if (!currentUser) return null
+  if (!currentUser) {
+    router.replace('/welcome')
+    return null
+  }
 
   return (
     <div className="flex flex-col min-h-svh max-w-lg mx-auto">

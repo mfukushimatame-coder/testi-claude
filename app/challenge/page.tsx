@@ -1,6 +1,7 @@
 'use client'
 
 import { useMemo } from 'react'
+import { useRouter } from 'next/navigation'
 import Header from '@/components/layout/Header'
 import BottomNav from '@/components/layout/BottomNav'
 import { useApp } from '@/context/AppContext'
@@ -73,6 +74,7 @@ function getWeekProgress(
 
 export default function ChallengePage() {
   const { state, currentUser, isLoading, joinChallenge, getCurrentStreak } = useApp()
+  const router = useRouter()
 
   // useMemo must be called unconditionally (Rules of Hooks)
   const friendStreaks = useMemo(() => {
@@ -110,7 +112,10 @@ export default function ChallengePage() {
       <BottomNav />
     </div>
   )
-  if (!currentUser) return null
+  if (!currentUser) {
+    router.replace('/welcome')
+    return null
+  }
 
   const streak = getCurrentStreak()
   const myBadges = state.badges.filter((b) => b.userId === currentUser.id)
