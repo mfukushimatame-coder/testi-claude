@@ -45,7 +45,7 @@ export default function UserProfilePage({ params }: { params: Promise<{ userId: 
     <div className="flex flex-col min-h-svh max-w-lg mx-auto">
       <Header title="プロフィール" />
 
-      <main className="flex-1 pb-24">
+      <main className="flex-1 pb-20">
         {/* Profile card */}
         <div className="bg-white border-b border-gray-100 px-4 py-5">
           <div className="flex items-start gap-4">
