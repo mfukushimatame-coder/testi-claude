@@ -140,7 +140,7 @@ export default function FeedPage() {
       </div>
 
       {/* Posts */}
-      <main className="flex-1 px-4 py-4 space-y-3 pb-32">
+      <main className="flex-1 px-4 py-4 space-y-3 pb-20">
         {filteredPosts.length === 0 ? (
           <div className="text-center py-12">
             <p className="text-sm text-gray-400">

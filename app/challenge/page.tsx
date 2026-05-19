@@ -142,7 +142,7 @@ export default function ChallengePage() {
     <div className="flex flex-col h-svh max-w-lg mx-auto">
       <Header title="チャレンジ" />
 
-      <div className="flex-1 overflow-y-auto px-4 py-4 space-y-4 pb-4">
+      <div className="flex-1 overflow-y-auto px-4 py-4 space-y-4 pb-20">
         {/* Streak card */}
         <div className="bg-gray-900 rounded-2xl p-5 text-white">
           <div className="flex items-center gap-4">
@@ -288,7 +288,6 @@ export default function ChallengePage() {
         )}
       </div>
 
-      <div className="h-16" />
       <BottomNav />
     </div>
   )

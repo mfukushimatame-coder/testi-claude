@@ -73,7 +73,7 @@ export default function OnboardingPage() {
   }
 
   return (
-    <div className="min-h-svh flex flex-col max-w-lg mx-auto px-6 bg-[#f5f5f3]">
+    <div className="min-h-svh flex flex-col max-w-lg mx-auto px-6 bg-[#f0ebe3]">
       {/* Step dots */}
       <div className="flex items-center gap-2 pt-10 pb-8">
         {[0, 1, 2].map((i) => (
