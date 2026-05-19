@@ -52,7 +52,7 @@ function AuthForm() {
       setLoading(false)
       if (loginError) { setError('メールアドレスまたはパスワードが正しくありません'); return }
       const { data: profile } = await supabase.from('profiles').select('id').eq('id', data.user.id).single()
-      router.push(profile ? '/chat' : '/onboarding')
+      router.push(profile ? '/today' : '/onboarding')
     }
   }
 

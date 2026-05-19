@@ -18,13 +18,13 @@ export default function WelcomePage() {
         .select('id')
         .eq('id', user.id)
         .single()
-      router.replace(profile ? '/chat' : '/onboarding')
+      router.replace(profile ? '/today' : '/onboarding')
     }
     checkAuth()
   }, [router])
 
   return (
-    <div className="min-h-svh flex flex-col bg-[#f5f5f3] max-w-lg mx-auto px-6">
+    <div className="min-h-svh flex flex-col bg-[#f0ebe3] max-w-lg mx-auto px-6">
       <div className="flex-1 flex flex-col justify-center pt-16 pb-8">
         {/* Wordmark */}
         <div className="mb-12">

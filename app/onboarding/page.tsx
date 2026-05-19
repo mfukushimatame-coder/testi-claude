@@ -64,7 +64,7 @@ export default function OnboardingPage() {
     try {
       await completeOnboarding(name.trim(), AVATAR_EMOJIS[avatarIndex], 'email', survey as Survey)
       setStep('done')
-      setTimeout(() => router.replace('/chat'), 1800)
+      setTimeout(() => router.replace('/today'), 1800)
     } catch (err) {
       console.error(err)
       setSaveError('保存に失敗しました。もう一度お試しください。')

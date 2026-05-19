@@ -24,7 +24,7 @@ export default function ChatMessage({ message, onSharePost }: Props) {
   return (
     <div className={`flex fade-in-up ${isUser ? 'justify-end' : 'justify-start'}`}>
       {!isUser && (
-        <div className="w-8 h-8 rounded-full bg-emerald-100 flex items-center justify-center text-sm mr-2 flex-shrink-0 mt-1">
+        <div className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center text-sm mr-2 flex-shrink-0 mt-1">
           🌿
         </div>
       )}
@@ -32,8 +32,8 @@ export default function ChatMessage({ message, onSharePost }: Props) {
         <div
           className={`rounded-2xl px-4 py-3 text-sm leading-relaxed whitespace-pre-wrap ${
             isUser
-              ? 'bg-emerald-500 text-white rounded-br-sm'
-              : 'glass text-sage-800 rounded-bl-sm shadow-sm'
+              ? 'bg-stone-700 text-white rounded-br-sm'
+              : 'bg-white/10 text-white rounded-bl-sm shadow-sm'
           }`}
         >
           {renderContent(message.content)}
@@ -44,7 +44,7 @@ export default function ChatMessage({ message, onSharePost }: Props) {
           <div className="mt-2 flex gap-2">
             <button
               onClick={onSharePost}
-              className="flex items-center gap-1.5 text-xs bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-full px-3 py-1.5 hover:bg-emerald-100 transition-colors font-medium"
+              className="flex items-center gap-1.5 text-xs bg-white/15 text-white border border-white/20 rounded-full px-3 py-1.5 hover:bg-white/20 transition-colors font-medium"
             >
               <span>📣</span>
               SNSに投稿する
@@ -52,7 +52,7 @@ export default function ChatMessage({ message, onSharePost }: Props) {
           </div>
         )}
 
-        <p className={`text-[10px] mt-1 ${isUser ? 'text-right text-sage-400' : 'text-sage-400'}`}>
+        <p className={`text-[10px] mt-1 text-white/40 ${isUser ? 'text-right' : ''}`}>
           {new Date(message.createdAt).toLocaleTimeString('ja-JP', { hour: '2-digit', minute: '2-digit' })}
         </p>
       </div>

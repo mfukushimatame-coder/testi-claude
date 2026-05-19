@@ -37,7 +37,7 @@ export default function RootLayout({
       <head>
         <link rel="apple-touch-icon" href="/icons/icon.svg" />
       </head>
-      <body className="min-h-full bg-[#f5f5f3] text-gray-900">
+      <body className="min-h-full bg-[#f0ebe3] text-stone-900">
         <AppProvider>{children}</AppProvider>
       </body>
     </html>
