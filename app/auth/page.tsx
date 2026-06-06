@@ -80,11 +80,11 @@ function AuthForm() {
   }
 
   return (
-    <div className="min-h-svh flex flex-col max-w-lg mx-auto px-6 py-10 bg-beige-100">
+    <div className="min-h-svh flex flex-col max-w-lg mx-auto px-6 py-10 bg-[#f0ebe3]">
       {/* Back */}
       <Link
         href="/welcome"
-        className="text-sage-400 hover:text-sage-600 mb-8 inline-flex items-center gap-1 text-sm"
+        className="text-stone-400 hover:text-stone-600 mb-8 inline-flex items-center gap-1 text-sm"
       >
         <svg
           width="16"
@@ -103,11 +103,11 @@ function AuthForm() {
 
       {/* Header */}
       <div className="mb-8">
-        <h1 className="text-2xl font-bold text-sage-800 mb-1">
+        <h1 className="text-2xl font-bold text-stone-800 mb-1">
           {mode === 'register' ? 'アカウントを作成' : 'ログイン'}
         </h1>
-        <p className="text-sm text-sage-500">
-          {mode === 'register' ? 'KakeSoへようこそ🌿' : 'おかえりなさい🌿'}
+        <p className="text-sm text-stone-500">
+          {mode === 'register' ? 'KakeSoへようこそ' : 'おかえりなさい'}
         </p>
       </div>
 
@@ -115,7 +115,7 @@ function AuthForm() {
       <div className="space-y-3 mb-6">
         <button
           onClick={handleGoogleLogin}
-          className="w-full flex items-center justify-center gap-3 bg-white border border-sage-200 rounded-2xl py-3.5 text-sm font-semibold text-sage-700 hover:bg-sage-50 transition-colors shadow-sm"
+          className="w-full flex items-center justify-center gap-3 bg-white border border-stone-200 rounded-2xl py-3.5 text-sm font-semibold text-stone-700 hover:bg-stone-50 transition-colors shadow-sm"
         >
           <svg width="20" height="20" viewBox="0 0 24 24">
             <path
@@ -141,15 +141,15 @@ function AuthForm() {
 
       {/* Divider */}
       <div className="flex items-center gap-3 mb-6">
-        <div className="flex-1 h-px bg-sage-200" />
-        <span className="text-xs text-sage-400">または</span>
-        <div className="flex-1 h-px bg-sage-200" />
+        <div className="flex-1 h-px bg-stone-200" />
+        <span className="text-xs text-stone-400">または</span>
+        <div className="flex-1 h-px bg-stone-200" />
       </div>
 
       {/* Email form */}
       <form onSubmit={handleEmailSubmit} className="space-y-3">
         <div>
-          <label className="block text-xs font-medium text-sage-600 mb-1.5">
+          <label className="block text-xs font-medium text-stone-600 mb-1.5">
             メールアドレス
           </label>
           <input
@@ -157,12 +157,12 @@ function AuthForm() {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             placeholder="example@email.com"
-            className="w-full glass rounded-2xl px-4 py-3 text-sm text-sage-800 placeholder-sage-400 outline-none border border-white/60 focus:border-emerald-300"
+            className="w-full bg-white rounded-2xl px-4 py-3 text-sm text-stone-800 placeholder-stone-400 outline-none border border-stone-200 focus:border-stone-400 transition-colors"
             required
           />
         </div>
         <div>
-          <label className="block text-xs font-medium text-sage-600 mb-1.5">
+          <label className="block text-xs font-medium text-stone-600 mb-1.5">
             パスワード
           </label>
           <input
@@ -170,7 +170,7 @@ function AuthForm() {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             placeholder="6文字以上"
-            className="w-full glass rounded-2xl px-4 py-3 text-sm text-sage-800 placeholder-sage-400 outline-none border border-white/60 focus:border-emerald-300"
+            className="w-full bg-white rounded-2xl px-4 py-3 text-sm text-stone-800 placeholder-stone-400 outline-none border border-stone-200 focus:border-stone-400 transition-colors"
             minLength={6}
             required
           />
@@ -193,7 +193,7 @@ function AuthForm() {
       </form>
 
       {/* Toggle mode */}
-      <p className="text-center text-sm text-sage-500 mt-6">
+      <p className="text-center text-sm text-stone-500 mt-6">
         {mode === 'register'
           ? 'すでにアカウントをお持ちですか？'
           : 'アカウントをお持ちでないですか？'}{' '}

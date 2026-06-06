@@ -90,6 +90,9 @@ interface AppContextValue {
 
   // Budget goals
   setBudgetGoal: (category: string, amount: number) => Promise<void>
+
+  // Profile
+  updateProfile: (fields: { avatar?: string; name?: string; bio?: string }) => Promise<void>
 }
 
 const AppContext = createContext<AppContextValue | null>(null)
@@ -332,12 +335,19 @@ export function AppProvider({ children }: { children: ReactNode }) {
     []
   )
 
-  const deleteTransaction = useCallback((id: string) => {
+  const deleteTransaction = useCallback(async (id: string) => {
     const supabase = createClient()
-    const userId = supabase.auth.getUser().then(({ data }) => {
-      if (!data.user) return
-      supabase.from('transactions').delete().eq('id', id).eq('user_id', data.user.id)
-    })
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return
+    const { error } = await supabase
+      .from('transactions')
+      .delete()
+      .eq('id', id)
+      .eq('user_id', user.id)
+    if (error) {
+      console.error('Failed to delete transaction:', error)
+      return
+    }
     setState((prev) => ({
       ...prev,
       transactions: prev.transactions.filter((t) => t.id !== id),
@@ -639,6 +649,28 @@ export function AppProvider({ children }: { children: ReactNode }) {
     }
   }, [])
 
+  // ── Profile update ────────────────────────────────────────────────────────────
+
+  const updateProfile = useCallback(async (fields: { avatar?: string; name?: string; bio?: string }) => {
+    const supabase = createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return
+    const { error } = await supabase
+      .from('profiles')
+      .update(fields)
+      .eq('id', user.id)
+    if (error) {
+      console.error('Failed to update profile:', error)
+      return
+    }
+    setState((prev) => ({
+      ...prev,
+      users: prev.users.map((u) =>
+        u.id === user.id ? { ...u, ...fields } : u
+      ),
+    }))
+  }, [])
+
   // ── NMD (No-Money-Day) ────────────────────────────────────────────────────────
 
   const recordNMD = useCallback(async (): Promise<void> => {
@@ -776,6 +808,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
         awardBadgeIfNeeded,
         joinChallenge,
         setBudgetGoal,
+        updateProfile,
       }}
     >
       {children}

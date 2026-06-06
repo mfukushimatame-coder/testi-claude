@@ -14,11 +14,12 @@ import { createClient } from '@/lib/supabase-client'
 const AVATARS = ['🌿', '🌸', '🦋', '🌻', '🍀', '🌈', '⭐', '🎯', '🦁', '🐬', '🦊', '🐧']
 
 export default function ProfilePage() {
-  const { state, currentUser } = useApp()
+  const { state, currentUser, updateProfile, isLoading } = useApp()
   const router = useRouter()
   const [tab, setTab] = useState<'posts' | 'stats' | 'friends'>('posts')
   const [showAvatarPicker, setShowAvatarPicker] = useState(false)
   const [loggingOut, setLoggingOut] = useState(false)
+  const [savingAvatar, setSavingAvatar] = useState(false)
 
   const monthKey = getCurrentMonthKey()
   const now = new Date()
@@ -84,13 +85,25 @@ export default function ProfilePage() {
           {/* Avatar picker */}
           {showAvatarPicker && (
             <div className="mt-4 p-3 bg-gray-50 rounded-xl">
-              <p className="text-xs text-gray-400 mb-2">アバターを選択</p>
+              <p className="text-xs text-gray-400 mb-2">
+                {savingAvatar ? '保存中...' : 'アバターを選択'}
+              </p>
               <div className="grid grid-cols-6 gap-2">
                 {AVATARS.map((emoji) => (
                   <button
                     key={emoji}
-                    onClick={() => setShowAvatarPicker(false)}
-                    className={`text-2xl p-2 rounded-lg transition-all active:scale-90 ${
+                    disabled={savingAvatar}
+                    onClick={async () => {
+                      if (emoji === currentUser.avatar) {
+                        setShowAvatarPicker(false)
+                        return
+                      }
+                      setSavingAvatar(true)
+                      await updateProfile({ avatar: emoji })
+                      setSavingAvatar(false)
+                      setShowAvatarPicker(false)
+                    }}
+                    className={`text-2xl p-2 rounded-lg transition-all active:scale-90 disabled:opacity-50 ${
                       currentUser.avatar === emoji ? 'bg-emerald-100' : 'hover:bg-gray-100'
                     }`}
                   >
