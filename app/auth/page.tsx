@@ -75,7 +75,7 @@ function AuthForm() {
         .eq('id', data.user.id)
         .single()
 
-      router.push(profile ? '/chat' : '/onboarding')
+      router.push(profile ? '/today' : '/onboarding')
     }
   }
 

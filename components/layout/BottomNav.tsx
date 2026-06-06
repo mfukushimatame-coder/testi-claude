@@ -4,9 +4,9 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 
 const NAV_ITEMS = [
-  { href: '/chat', label: 'チャット', icon: ChatIcon },
+  { href: '/today', label: 'ホーム', icon: HomeIcon },
   { href: '/feed', label: 'フィード', icon: FeedIcon },
-  { href: '/dashboard', label: '家計簿', icon: DashboardIcon },
+  { href: '/chat', label: '記録', icon: ChatIcon },
   { href: '/challenge', label: 'チャレンジ', icon: ChallengeIcon },
   { href: '/profile', label: 'マイページ', icon: ProfileIcon },
 ]
@@ -38,6 +38,15 @@ export default function BottomNav() {
         })}
       </div>
     </nav>
+  )
+}
+
+function HomeIcon({ active }: { active: boolean }) {
+  return (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={active ? 2.2 : 1.8} strokeLinecap="round" strokeLinejoin="round">
+      <path d="M3 9.5L12 3l9 6.5V20a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9.5z" fill={active ? 'currentColor' : 'none'} fillOpacity={active ? 0.15 : 0} />
+      <path d="M9 21V12h6v9" />
+    </svg>
   )
 }
 

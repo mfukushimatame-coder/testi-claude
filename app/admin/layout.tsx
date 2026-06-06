@@ -10,7 +10,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
   } = await supabase.auth.getUser()
 
   if (!user || user.email !== ADMIN_EMAIL) {
-    redirect('/chat')
+    redirect('/today')
   }
 
   return <div className="min-h-svh bg-gray-50">{children}</div>
