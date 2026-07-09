@@ -64,8 +64,12 @@ export default function TransactionList({ transactions, limit }: Props) {
                 </p>
               </div>
               <button
-                onClick={() => deleteTransaction(tx.id)}
-                className="opacity-0 group-hover:opacity-100 transition-opacity ml-1 text-sage-300 hover:text-rose-400 flex-shrink-0"
+                onClick={() => {
+                  if (confirm(`「${tx.memo || tx.category}」の記録を削除する？`)) {
+                    deleteTransaction(tx.id)
+                  }
+                }}
+                className="ml-1 p-1.5 text-sage-300 hover:text-rose-400 sm:opacity-40 sm:group-hover:opacity-100 transition-opacity flex-shrink-0"
                 aria-label="削除"
               >
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">

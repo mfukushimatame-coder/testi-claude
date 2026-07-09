@@ -24,6 +24,7 @@ import {
   BudgetGoal,
 } from '@/lib/types'
 import { createClient } from '@/lib/supabase-client'
+import { localDateKey } from '@/lib/date'
 
 // ───── Empty state (server-safe, no localStorage) ────────────────────────────
 
@@ -712,7 +713,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     } = await supabase.auth.getUser()
     if (!user) return
 
-    const today = new Date().toISOString().split('T')[0]
+    const today = localDateKey()
     const { data, error } = await supabase
       .from('no_money_days')
       .insert({ user_id: user.id, date: today })
@@ -729,7 +730,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   }, [])
 
   const hasNMDToday = useCallback((): boolean => {
-    const today = new Date().toISOString().split('T')[0]
+    const today = localDateKey()
     return state.noMoneyDays.some(
       (n) => n.userId === state.currentUserId && n.date === today
     )
@@ -749,7 +750,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     for (let i = 0; i < 365; i++) {
       const d = new Date(today)
       d.setDate(today.getDate() - i)
-      const key = d.toISOString().split('T')[0]
+      const key = localDateKey(d)
       if (activeDates.has(key)) {
         streak++
       } else {

@@ -8,6 +8,7 @@ import ChatInput from '@/components/chat/ChatInput'
 import { useApp } from '@/context/AppContext'
 import { parseInput } from '@/lib/parser'
 import { Transaction } from '@/lib/types'
+import { localDateKey, localMonthKey } from '@/lib/date'
 
 // ─── Weekly summary helper ────────────────────────────────────────────────────
 
@@ -17,7 +18,7 @@ function getLastMondayKey(): string {
   const diff = day === 0 ? 6 : day - 1
   const monday = new Date(d)
   monday.setDate(d.getDate() - diff)
-  return monday.toISOString().split('T')[0]
+  return localDateKey(monday)
 }
 
 function buildWeeklySummary(
@@ -27,7 +28,7 @@ function buildWeeklySummary(
 ): string {
   const weekEnd = new Date(weekStart)
   weekEnd.setDate(weekEnd.getDate() + 6)
-  const weekEndStr = weekEnd.toISOString().split('T')[0]
+  const weekEndStr = localDateKey(weekEnd)
 
   const weekTx = transactions.filter(
     (t) => t.userId === userId && t.date >= weekStart && t.date <= weekEndStr
@@ -116,7 +117,7 @@ export default function ChatPage() {
       weeklySummaryRef.current = true
       const prevMonday = new Date(lastMondayKey)
       prevMonday.setDate(prevMonday.getDate() - 7)
-      const prevWeekStart = prevMonday.toISOString().split('T')[0]
+      const prevWeekStart = localDateKey(prevMonday)
 
       setTimeout(() => {
         const summary = buildWeeklySummary(state.transactions, currentUser.id, prevWeekStart)
@@ -164,7 +165,17 @@ export default function ChatPage() {
     const result = parseInput(text, state.currentUserId)
 
     if (result.type === 'record') {
-      const tx = await addTransaction(result.transaction)
+      let tx: Transaction
+      try {
+        tx = await addTransaction(result.transaction)
+      } catch (err) {
+        console.error('Failed to record transaction:', err)
+        addChatMessage({
+          role: 'assistant',
+          content: '⚠️ 記録に失敗しちゃった。通信環境を確認して、もう一度試してね。',
+        })
+        return
+      }
       setLastRecordedTx(tx)
       const typeLabel = result.transaction.type === 'income' ? '収入' : '支出'
       const amountStr = result.transaction.amount.toLocaleString('ja-JP')
@@ -175,7 +186,7 @@ export default function ChatPage() {
 
       // Budget goal warning
       if (result.transaction.type === 'expense') {
-        const monthKey = new Date().toISOString().slice(0, 7)
+        const monthKey = localMonthKey()
         const goal = state.budgetGoals.find(
           (g) =>
             g.userId === state.currentUserId &&
@@ -275,9 +286,7 @@ export default function ChatPage() {
 
   const streak = getCurrentStreak()
   const todayHasTx = state.transactions.some(
-    (t) =>
-      t.userId === state.currentUserId &&
-      t.date === new Date().toISOString().split('T')[0]
+    (t) => t.userId === state.currentUserId && t.date === localDateKey()
   )
   const showNMDButton = !todayHasTx && !hasNMDToday()
 

@@ -7,21 +7,13 @@ import Header from '@/components/layout/Header'
 import BottomNav from '@/components/layout/BottomNav'
 import PostCard from '@/components/social/PostCard'
 import { useApp } from '@/context/AppContext'
+import { todayKey as getTodayKey, localMonthKey as getMonthKey } from '@/lib/date'
 
 function getGreeting(): string {
   const h = new Date().getHours()
   if (h < 10) return 'おはよう'
   if (h < 17) return 'こんにちは'
   return 'こんばんは'
-}
-
-function getTodayKey(): string {
-  return new Date().toISOString().split('T')[0]
-}
-
-function getMonthKey(): string {
-  const d = new Date()
-  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`
 }
 
 const DAILY_TIPS = [

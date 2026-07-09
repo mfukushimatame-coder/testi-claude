@@ -1,4 +1,5 @@
 import { Transaction, TransactionType } from './types'
+import { todayKey } from './date'
 
 // ───── Types ─────────────────────────────────────────────────────────────────
 
@@ -198,7 +199,7 @@ export function parseInput(text: string, userId: string): ParseResult {
     if (amount !== null) {
       const { category, type } = detectCategory(trimmed)
       const memo = extractMemo(trimmed)
-      const today = new Date().toISOString().slice(0, 10)
+      const today = todayKey()
       return {
         type: 'record',
         transaction: { userId, type, amount, category, memo: memo || trimmed, date: today },

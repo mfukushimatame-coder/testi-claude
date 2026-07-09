@@ -4,6 +4,7 @@ import { useMemo } from 'react'
 import Header from '@/components/layout/Header'
 import BottomNav from '@/components/layout/BottomNav'
 import { useApp } from '@/context/AppContext'
+import { localDateKey } from '@/lib/date'
 
 // ─── Badge catalog ────────────────────────────────────────────────────────────
 
@@ -26,7 +27,7 @@ function getThisWeekStart(): string {
   const diff = day === 0 ? 6 : day - 1
   const monday = new Date(d)
   monday.setDate(d.getDate() - diff)
-  return monday.toISOString().split('T')[0]
+  return localDateKey(monday)
 }
 
 function getWeekProgress(
@@ -40,7 +41,7 @@ function getWeekProgress(
 ): { current: number; pct: number } {
   const weekEnd = new Date(weekStart)
   weekEnd.setDate(weekEnd.getDate() + 6)
-  const weekEndStr = weekEnd.toISOString().split('T')[0]
+  const weekEndStr = localDateKey(weekEnd)
 
   if (type === 'spending_limit') {
     const spent = transactions
@@ -74,6 +75,31 @@ function getWeekProgress(
 export default function ChallengePage() {
   const { state, currentUser, joinChallenge, getCurrentStreak } = useApp()
 
+  // Hooks must run unconditionally — keep useMemo above any early return
+  const friendStreaks = useMemo(() => {
+    if (!currentUser) return []
+    return state.users
+      .filter((u) => u.id !== currentUser.id)
+      .map((u) => {
+        const activeDates = new Set([
+          ...state.transactions.filter((t) => t.userId === u.id).map((t) => t.date),
+          ...state.noMoneyDays.filter((n) => n.userId === u.id).map((n) => n.date),
+        ])
+        let s = 0
+        const today = new Date()
+        for (let i = 0; i < 365; i++) {
+          const d = new Date(today)
+          d.setDate(today.getDate() - i)
+          const key = localDateKey(d)
+          if (activeDates.has(key)) s++
+          else break
+        }
+        return { user: u, streak: s }
+      })
+      .sort((a, b) => b.streak - a.streak)
+      .slice(0, 5)
+  }, [state.users, state.transactions, state.noMoneyDays, currentUser])
+
   if (!currentUser) return null
 
   const streak = getCurrentStreak()
@@ -93,33 +119,9 @@ export default function ChallengePage() {
     return (
       n.userId === currentUser.id &&
       n.date >= thisWeekStart &&
-      n.date <= weekEnd.toISOString().split('T')[0]
+      n.date <= localDateKey(weekEnd)
     )
   }).length
-
-  // Friends' streaks for leaderboard
-  const friendStreaks = useMemo(() => {
-    return state.users
-      .filter((u) => u.id !== currentUser.id)
-      .map((u) => {
-        const activeDates = new Set([
-          ...state.transactions.filter((t) => t.userId === u.id).map((t) => t.date),
-          ...state.noMoneyDays.filter((n) => n.userId === u.id).map((n) => n.date),
-        ])
-        let s = 0
-        const today = new Date()
-        for (let i = 0; i < 365; i++) {
-          const d = new Date(today)
-          d.setDate(today.getDate() - i)
-          const key = d.toISOString().split('T')[0]
-          if (activeDates.has(key)) s++
-          else break
-        }
-        return { user: u, streak: s }
-      })
-      .sort((a, b) => b.streak - a.streak)
-      .slice(0, 5)
-  }, [state.users, state.transactions, state.noMoneyDays, currentUser.id])
 
   return (
     <div className="flex flex-col h-svh max-w-lg mx-auto">
