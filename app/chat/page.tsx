@@ -292,19 +292,19 @@ export default function ChatPage() {
 
   return (
     <div className="flex flex-col h-svh max-w-lg mx-auto">
-      <Header title="KakeSo 🌿" subtitle="チャットで記録・分析" />
+      <Header title="KakeSo" />
 
       {/* Streak banner */}
       {streak > 0 && (
-        <div className="flex items-center justify-center gap-2 py-1.5 bg-gradient-to-r from-emerald-50 to-amber-50 border-b border-sage-100 text-xs font-semibold text-sage-700">
-          <span>🔥</span>
-          <span>{streak}日連続記録中！</span>
-          {streak >= 7 && <span className="text-amber-500">すごい！</span>}
+        <div className="flex items-center justify-center gap-2 py-1.5 bg-[#1c1917] text-xs font-semibold text-white">
+          <span className="tabular-nums">{streak}日連続</span>
+          <span className="text-white/50 font-normal">記録中</span>
+          {streak >= 7 && <span className="text-orange-400">— {streak >= 30 ? '30日達成' : '7日達成'}</span>}
         </div>
       )}
 
       {/* Messages */}
-      <div className="flex-1 overflow-y-auto px-4 py-4 space-y-3 pb-2">
+      <div className="flex-1 overflow-y-auto bg-[#1c1917] px-4 py-4 space-y-3 pb-2">
         {state.chatMessages.map((msg) => (
           <ChatMessage
             key={msg.id}
@@ -320,15 +320,15 @@ export default function ChatPage() {
         {/* Typing indicator */}
         {isTyping && (
           <div className="flex items-center gap-2 fade-in-up">
-            <div className="w-8 h-8 rounded-full bg-emerald-100 flex items-center justify-center text-sm flex-shrink-0">
+            <div className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center text-sm flex-shrink-0">
               🌿
             </div>
-            <div className="glass rounded-2xl rounded-bl-sm px-4 py-3 shadow-sm">
+            <div className="bg-white/10 rounded-2xl rounded-bl-sm px-4 py-3">
               <div className="flex gap-1 items-center h-4">
                 {[0, 1, 2].map((i) => (
                   <span
                     key={i}
-                    className="w-1.5 h-1.5 bg-sage-400 rounded-full animate-bounce"
+                    className="w-1.5 h-1.5 bg-white/40 rounded-full animate-bounce"
                     style={{ animationDelay: `${i * 0.15}s` }}
                   />
                 ))}
@@ -341,20 +341,18 @@ export default function ChatPage() {
 
       {/* NMD button */}
       {showNMDButton && (
-        <div className="px-4 pb-2">
+        <div className="bg-[#1c1917] px-4 pb-2">
           <button
             onClick={handleNMD}
-            className="w-full flex items-center justify-center gap-2 py-3 rounded-2xl border-2 border-dashed border-emerald-300 bg-emerald-50 hover:bg-emerald-100 transition-colors text-sm font-semibold text-emerald-700 active:scale-95"
+            className="w-full flex items-center justify-center gap-2 py-3 rounded-2xl border border-white/20 bg-white/10 hover:bg-white/15 transition-colors text-sm font-medium text-white/70 active:scale-95"
           >
-            <span className="text-lg">💰</span>
-            今日はお金を使わなかった！（NMD）
+            今日はお金を使わなかった
           </button>
         </div>
       )}
 
       <ChatInput onSend={handleSend} disabled={isTyping} />
 
-      <div className="h-16" />
       <BottomNav />
     </div>
   )

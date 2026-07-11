@@ -14,7 +14,7 @@ import { createClient } from '@/lib/supabase-client'
 const AVATARS = ['🌿', '🌸', '🦋', '🌻', '🍀', '🌈', '⭐', '🎯', '🦁', '🐬', '🦊', '🐧']
 
 export default function ProfilePage() {
-  const { state, currentUser, updateProfile, isLoading } = useApp()
+  const { state, currentUser, isLoading, updateProfile } = useApp()
   const router = useRouter()
   const [tab, setTab] = useState<'posts' | 'stats' | 'friends'>('posts')
   const [showAvatarPicker, setShowAvatarPicker] = useState(false)
@@ -55,7 +55,6 @@ export default function ProfilePage() {
       if (!res.ok) throw new Error('delete failed')
       const supabase = createClient()
       await supabase.auth.signOut()
-      // Full reload to clear all in-memory app state
       window.location.href = '/welcome'
     } catch (err) {
       console.error(err)
@@ -64,13 +63,27 @@ export default function ProfilePage() {
     }
   }
 
-  if (!currentUser) return null
+  if (isLoading) return (
+    <div className="flex flex-col min-h-svh max-w-lg mx-auto">
+      <Header title="マイページ" />
+      <div className="flex-1 flex items-center justify-center">
+        <div className="flex gap-1.5">
+          {[0,1,2].map(i => <span key={i} className="w-2 h-2 bg-gray-300 rounded-full animate-bounce" style={{animationDelay:`${i*0.15}s`}} />)}
+        </div>
+      </div>
+      <BottomNav />
+    </div>
+  )
+  if (!currentUser) {
+    router.replace('/welcome')
+    return null
+  }
 
   return (
     <div className="flex flex-col min-h-svh max-w-lg mx-auto">
       <Header title="マイページ" />
 
-      <main className="flex-1 pb-24">
+      <main className="flex-1 pb-20">
         {/* Profile card */}
         <div className="bg-white border-b border-gray-100 px-4 py-5">
           <div className="flex items-start gap-4">
@@ -241,7 +254,7 @@ export default function ProfilePage() {
           >
             {deleting ? '削除中...' : 'アカウントを削除'}
           </button>
-          <p className="text-[11px] text-gray-400 text-center mt-1 px-4 leading-relaxed">
+          <p className="text-[11px] text-gray-400 text-center mt-1 leading-relaxed">
             削除するとすべてのデータが消え、元に戻せません
           </p>
         </div>

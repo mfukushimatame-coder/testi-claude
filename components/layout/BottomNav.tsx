@@ -3,57 +3,53 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 
-const NAV_ITEMS = [
-  { href: '/today', label: 'ホーム', icon: HomeIcon },
-  { href: '/feed', label: 'フィード', icon: FeedIcon },
-  { href: '/chat', label: '記録', icon: ChatIcon },
-  { href: '/challenge', label: 'チャレンジ', icon: ChallengeIcon },
-  { href: '/profile', label: 'マイページ', icon: ProfileIcon },
-]
-
 export default function BottomNav() {
   const pathname = usePathname()
+  const isActive = (href: string) => pathname === href || (href !== '/today' && pathname.startsWith(href))
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-50 bg-white border-t border-gray-200">
-      <div className="flex items-stretch max-w-lg mx-auto">
-        {NAV_ITEMS.map(({ href, label, icon: Icon }) => {
-          const active = pathname.startsWith(href)
-          return (
+    <nav className="fixed bottom-0 left-0 right-0 z-50">
+      <div className="max-w-lg mx-auto bg-white border-t border-stone-100 shadow-[0_-4px_20px_rgba(0,0,0,0.06)]">
+        <div className="flex items-center justify-around px-2 pb-safe-or-2 pt-2 relative">
+          <NavItem href="/today" label="Today" active={isActive('/today')} icon={<TodayIcon active={isActive('/today')} />} />
+          <NavItem href="/feed" label="フィード" active={isActive('/feed')} icon={<FeedIcon active={isActive('/feed')} />} />
+
+          {/* Center + button */}
+          <div className="flex flex-col items-center -mt-6 relative z-10">
             <Link
-              key={href}
-              href={href}
-              className={`flex flex-1 flex-col items-center justify-center py-2.5 gap-0.5 transition-colors ${
-                active
-                  ? 'text-emerald-600'
-                  : 'text-gray-400 hover:text-gray-600'
-              }`}
+              href="/chat"
+              className="w-14 h-14 bg-[#1c1917] rounded-full flex items-center justify-center shadow-[0_4px_20px_rgba(28,25,23,0.35)] active:scale-95 transition-transform"
+              aria-label="記録する"
             >
-              <Icon active={active} />
-              <span className={`text-[9px] font-medium tracking-wide ${active ? 'text-emerald-600' : 'text-gray-400'}`}>
-                {label}
-              </span>
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <line x1="12" y1="5" x2="12" y2="19" />
+                <line x1="5" y1="12" x2="19" y2="12" />
+              </svg>
             </Link>
-          )
-        })}
+          </div>
+
+          <NavItem href="/challenge" label="Goals" active={isActive('/challenge')} icon={<GoalsIcon active={isActive('/challenge')} />} />
+          <NavItem href="/profile" label="マイページ" active={isActive('/profile')} icon={<ProfileIcon active={isActive('/profile')} />} />
+        </div>
       </div>
     </nav>
   )
 }
 
-function HomeIcon({ active }: { active: boolean }) {
+function NavItem({ href, label, active, icon }: { href: string; label: string; active: boolean; icon: React.ReactNode }) {
   return (
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={active ? 2.2 : 1.8} strokeLinecap="round" strokeLinejoin="round">
-      <path d="M3 9.5L12 3l9 6.5V20a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9.5z" fill={active ? 'currentColor' : 'none'} fillOpacity={active ? 0.15 : 0} />
-      <path d="M9 21V12h6v9" />
-    </svg>
+    <Link href={href} className={`flex flex-col items-center gap-1 w-14 py-1 transition-colors ${active ? 'text-[#1c1917]' : 'text-stone-400 hover:text-stone-600'}`}>
+      {icon}
+      <span className={`text-[10px] font-medium ${active ? 'text-[#1c1917]' : 'text-stone-400'}`}>{label}</span>
+    </Link>
   )
 }
 
-function ChatIcon({ active }: { active: boolean }) {
+function TodayIcon({ active }: { active: boolean }) {
   return (
-    <svg width="20" height="20" viewBox="0 0 24 24" fill={active ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth={active ? 0 : 1.8} strokeLinecap="round" strokeLinejoin="round">
-      <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={active ? 2.2 : 1.8} strokeLinecap="round" strokeLinejoin="round">
+      <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+      <polyline points="9 22 9 12 15 12 15 22" />
     </svg>
   )
 }
@@ -61,45 +57,26 @@ function ChatIcon({ active }: { active: boolean }) {
 function FeedIcon({ active }: { active: boolean }) {
   return (
     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={active ? 2.2 : 1.8} strokeLinecap="round" strokeLinejoin="round">
-      <rect x="3" y="3" width="18" height="5" rx="1.5" />
-      <rect x="3" y="11" width="18" height="5" rx="1.5" />
-      <rect x="3" y="19" width="18" height="2" rx="1" />
+      <path d="M4 6h16M4 12h16M4 18h10" />
     </svg>
   )
 }
 
-function DashboardIcon({ active }: { active: boolean }) {
+function GoalsIcon({ active }: { active: boolean }) {
   return (
     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={active ? 2.2 : 1.8} strokeLinecap="round" strokeLinejoin="round">
-      <path d="M3 3v18h18" />
-      <path d="M18 9l-5 5-3-3-4 4" />
-    </svg>
-  )
-}
-
-function ChallengeIcon({ active }: { active: boolean }) {
-  return (
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={active ? 2.2 : 1.8} strokeLinecap="round" strokeLinejoin="round">
-      <circle cx="12" cy="8" r="6" />
-      <path d="M8.56 2.75c4.37 6.03 6.02 9.42 8.03 17.72m2.54-15.38c-3.72 4.35-8.94 5.66-16.88 5.85m19.5 1.9c-3.5-.93-6.63-.82-8.94 0-2.58.92-5.01 2.86-7.44 6.32" />
+      <circle cx="12" cy="12" r="10" />
+      <circle cx="12" cy="12" r="6" />
+      <circle cx="12" cy="12" r="2" />
     </svg>
   )
 }
 
 function ProfileIcon({ active }: { active: boolean }) {
   return (
-    <svg width="20" height="20" viewBox="0 0 24 24" fill={active ? 'currentColor' : 'none'} stroke={active ? 'none' : 'currentColor'} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-      {active ? (
-        <>
-          <path d="M12 12a5 5 0 1 0 0-10 5 5 0 0 0 0 10z" />
-          <path d="M20 21a8 8 0 1 0-16 0" />
-        </>
-      ) : (
-        <>
-          <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
-          <circle cx="12" cy="7" r="4" />
-        </>
-      )}
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={active ? 2.2 : 1.8} strokeLinecap="round" strokeLinejoin="round">
+      <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+      <circle cx="12" cy="7" r="4" />
     </svg>
   )
 }

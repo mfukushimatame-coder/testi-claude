@@ -6,11 +6,6 @@ import CommentList from './CommentList'
 import FollowButton from './FollowButton'
 import Link from 'next/link'
 
-const CATEGORY_ICONS: Record<string, string> = {
-  '食費': '🍱', '交通費': '🚃', '娯楽費': '🎮', '日用品': '🧴',
-  '家賃': '🏠', '光熱費': '💡', '通信費': '📱', '美容': '💄',
-  '医療費': '💊', '衣類': '👗', '給与': '💰', '副業': '💼', 'その他': '📌',
-}
 
 interface Props {
   post: Post
@@ -29,7 +24,6 @@ export default function PostCard({ post }: Props) {
   const liked = post.likes.includes(state.currentUserId)
   const isOwn = post.userId === state.currentUserId
 
-  const icon = post.category ? (CATEGORY_ICONS[post.category] ?? '📌') : '📝'
   const isIncome = post.category === '給与' || post.category === '副業'
 
   return (
@@ -57,11 +51,10 @@ export default function PostCard({ post }: Props) {
           <div className={`inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-xs font-semibold mb-2 ${
             isIncome
               ? 'bg-emerald-50 text-emerald-700'
-              : 'bg-red-50 text-red-600'
+              : 'bg-gray-100 text-gray-600'
           }`}>
-            <span>{icon}</span>
             <span>{post.category}</span>
-            <span className="opacity-40">|</span>
+            <span className="opacity-30">·</span>
             <span>{isIncome ? '+' : '-'}{post.amount.toLocaleString('ja-JP')}円</span>
           </div>
         )}
