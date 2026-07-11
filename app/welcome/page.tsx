@@ -22,7 +22,7 @@ export default function WelcomePage() {
         .eq('id', user.id)
         .single()
 
-      router.replace(profile ? '/chat' : '/onboarding')
+      router.replace(profile ? '/today' : '/onboarding')
     }
     checkAuth()
   }, [router])
@@ -82,6 +82,11 @@ export default function WelcomePage() {
         >
           すでにアカウントをお持ちの方はこちら
         </Link>
+        <p className="text-center text-[11px] text-sage-400 pt-1">
+          <Link href="/privacy" className="underline hover:text-sage-600">プライバシーポリシー</Link>
+          {' ・ '}
+          <Link href="/terms" className="underline hover:text-sage-600">利用規約</Link>
+        </p>
       </div>
     </div>
   )
