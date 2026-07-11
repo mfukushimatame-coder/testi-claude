@@ -63,18 +63,18 @@ export default function OnboardingPage() {
   }
 
   return (
-    <div className="min-h-svh flex flex-col max-w-lg mx-auto px-6 bg-beige-100">
+    <div className="min-h-svh flex flex-col max-w-lg mx-auto px-6 bg-[#f0ebe3]">
       {/* Step indicator */}
-      <div className="flex items-center justify-center gap-3 pt-10 pb-6">
+      <div className="flex items-center justify-center gap-2 pt-10 pb-8">
         {[0, 1, 2].map((i) => (
           <div
             key={i}
             className={`rounded-full transition-all duration-300 ${
               i === stepIndex
-                ? 'w-8 h-3 bg-emerald-500'
+                ? 'w-8 h-2 bg-[#1c1917]'
                 : i < stepIndex
-                ? 'w-3 h-3 bg-emerald-300'
-                : 'w-3 h-3 bg-sage-200'
+                ? 'w-2 h-2 bg-stone-400'
+                : 'w-2 h-2 bg-stone-300'
             }`}
           />
         ))}
@@ -84,12 +84,12 @@ export default function OnboardingPage() {
       {step === 'profile' && (
         <div className="flex-1 flex flex-col gap-6 pb-10">
           <div>
-            <h1 className="text-2xl font-bold text-sage-800 mb-1">プロフィール設定</h1>
-            <p className="text-sm text-sage-500">KakeSoで使う名前とアバターを選んでね</p>
+            <h1 className="text-2xl font-bold text-stone-900 tracking-tight">プロフィール設定</h1>
+            <p className="text-sm text-stone-500 mt-1">KakeSoで使う名前とアバターを選んでね</p>
           </div>
 
           <div>
-            <p className="text-xs font-medium text-sage-600 mb-2">アバターを選ぶ</p>
+            <p className="text-xs font-medium text-stone-500 mb-2 uppercase tracking-wider">アバターを選ぶ</p>
             <div className="grid grid-cols-6 gap-2">
               {AVATARS.map((a) => (
                 <button
@@ -97,8 +97,8 @@ export default function OnboardingPage() {
                   onClick={() => setAvatar(a)}
                   className={`text-2xl h-12 rounded-2xl transition-all ${
                     avatar === a
-                      ? 'bg-emerald-100 ring-2 ring-emerald-400 scale-110'
-                      : 'bg-white hover:bg-sage-50'
+                      ? 'bg-[#1c1917] scale-105'
+                      : 'bg-white border border-stone-200 hover:bg-stone-50'
                   }`}
                 >
                   {a}
@@ -108,7 +108,7 @@ export default function OnboardingPage() {
           </div>
 
           <div>
-            <label className="block text-xs font-medium text-sage-600 mb-1.5">
+            <label className="block text-xs font-medium text-stone-500 mb-1.5 uppercase tracking-wider">
               ニックネーム
             </label>
             <input
@@ -116,20 +116,20 @@ export default function OnboardingPage() {
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="例：みらい、たくや、節約マン"
-              className="w-full glass rounded-2xl px-4 py-3.5 text-sm text-sage-800 placeholder-sage-400 outline-none border border-white/60 focus:border-emerald-300"
+              className="w-full bg-white rounded-2xl px-4 py-3.5 text-sm text-stone-900 placeholder-stone-400 outline-none border border-stone-200 focus:border-stone-400 transition-colors"
               maxLength={20}
               autoFocus
             />
           </div>
 
           {name && (
-            <div className="glass rounded-2xl p-4 flex items-center gap-3 fade-in-up">
-              <div className="w-12 h-12 rounded-full bg-emerald-50 flex items-center justify-center text-2xl">
+            <div className="bg-white rounded-2xl p-4 flex items-center gap-3 border border-stone-200">
+              <div className="w-12 h-12 rounded-full bg-stone-100 flex items-center justify-center text-2xl">
                 {avatar}
               </div>
               <div>
-                <p className="font-semibold text-sage-800">{name}</p>
-                <p className="text-xs text-sage-400">節約がんばり中💪</p>
+                <p className="font-semibold text-stone-900">{name}</p>
+                <p className="text-xs text-stone-400">KakeSoユーザー</p>
               </div>
             </div>
           )}
@@ -139,9 +139,9 @@ export default function OnboardingPage() {
           <button
             onClick={() => setStep('survey')}
             disabled={!canProceedProfile}
-            className="w-full bg-emerald-500 text-white font-bold py-4 rounded-2xl shadow-md hover:bg-emerald-600 transition-colors active:scale-95 disabled:opacity-40"
+            className="w-full bg-[#1c1917] text-white font-semibold py-4 rounded-2xl hover:bg-stone-800 transition-colors active:scale-[0.98] disabled:opacity-40 text-sm"
           >
-            次へ →
+            次へ
           </button>
         </div>
       )}
@@ -150,13 +150,13 @@ export default function OnboardingPage() {
       {step === 'survey' && (
         <div className="flex-1 flex flex-col gap-5 pb-10 overflow-y-auto">
           <div>
-            <h1 className="text-2xl font-bold text-sage-800 mb-1">アンケート</h1>
-            <p className="text-sm text-sage-500">より良いサービスのためにお聞きします</p>
+            <h1 className="text-2xl font-bold text-stone-900 tracking-tight">アンケート</h1>
+            <p className="text-sm text-stone-500 mt-1">より良いサービスのためにお聞きします</p>
           </div>
 
           {/* Gender */}
           <div>
-            <p className="text-xs font-medium text-sage-600 mb-2">性別</p>
+            <p className="text-xs font-medium text-stone-500 mb-2 uppercase tracking-wider">性別</p>
             <div className="grid grid-cols-2 gap-2">
               {(['男性', '女性', 'その他', '回答しない'] as const).map((g) => (
                 <button
@@ -164,8 +164,8 @@ export default function OnboardingPage() {
                   onClick={() => setSurvey((s) => ({ ...s, gender: g }))}
                   className={`py-3 rounded-2xl text-sm font-medium transition-all ${
                     survey.gender === g
-                      ? 'bg-emerald-500 text-white shadow-sm'
-                      : 'bg-white text-sage-600 hover:bg-sage-50'
+                      ? 'bg-[#1c1917] text-white'
+                      : 'bg-white text-stone-600 border border-stone-200 hover:bg-stone-50'
                   }`}
                 >
                   {g}
@@ -176,7 +176,7 @@ export default function OnboardingPage() {
 
           {/* Age group */}
           <div>
-            <p className="text-xs font-medium text-sage-600 mb-2">年代</p>
+            <p className="text-xs font-medium text-stone-500 mb-2 uppercase tracking-wider">年代</p>
             <div className="grid grid-cols-3 gap-2">
               {(['10代', '20代', '30代', '40代', '50代以上'] as const).map((a) => (
                 <button
@@ -184,8 +184,8 @@ export default function OnboardingPage() {
                   onClick={() => setSurvey((s) => ({ ...s, ageGroup: a }))}
                   className={`py-3 rounded-2xl text-sm font-medium transition-all ${
                     survey.ageGroup === a
-                      ? 'bg-emerald-500 text-white shadow-sm'
-                      : 'bg-white text-sage-600 hover:bg-sage-50'
+                      ? 'bg-[#1c1917] text-white'
+                      : 'bg-white text-stone-600 border border-stone-200 hover:bg-stone-50'
                   }`}
                 >
                   {a}
@@ -196,11 +196,11 @@ export default function OnboardingPage() {
 
           {/* Prefecture */}
           <div>
-            <p className="text-xs font-medium text-sage-600 mb-2">お住まいの都道府県</p>
+            <p className="text-xs font-medium text-stone-500 mb-2 uppercase tracking-wider">お住まいの都道府県</p>
             <select
               value={survey.prefecture}
               onChange={(e) => setSurvey((s) => ({ ...s, prefecture: e.target.value }))}
-              className="w-full glass rounded-2xl px-4 py-3 text-sm text-sage-800 outline-none border border-white/60 bg-white/70"
+              className="w-full bg-white rounded-2xl px-4 py-3 text-sm text-stone-800 outline-none border border-stone-200 focus:border-stone-400 transition-colors"
             >
               <option value="">選択してください</option>
               {PREFECTURES.map((p) => (
@@ -213,7 +213,7 @@ export default function OnboardingPage() {
 
           {/* Apps used */}
           <div>
-            <p className="text-xs font-medium text-sage-600 mb-1">
+            <p className="text-xs font-medium text-stone-500 mb-2 uppercase tracking-wider">
               家計簿アプリを今まで何個使ったことがある？
             </p>
             <div className="grid grid-cols-3 gap-2">
@@ -223,8 +223,8 @@ export default function OnboardingPage() {
                   onClick={() => setSurvey((s) => ({ ...s, appsUsed: n }))}
                   className={`py-3 rounded-2xl text-sm font-medium transition-all ${
                     survey.appsUsed === n
-                      ? 'bg-emerald-500 text-white shadow-sm'
-                      : 'bg-white text-sage-600 hover:bg-sage-50'
+                      ? 'bg-[#1c1917] text-white'
+                      : 'bg-white text-stone-600 border border-stone-200 hover:bg-stone-50'
                   }`}
                 >
                   {n}
@@ -238,13 +238,13 @@ export default function OnboardingPage() {
             onClick={() => setSurvey((s) => ({ ...s, dataConsent: !s.dataConsent }))}
             className={`w-full flex items-start gap-3 p-4 rounded-2xl border-2 transition-all text-left ${
               survey.dataConsent
-                ? 'border-emerald-400 bg-emerald-50'
-                : 'border-sage-200 bg-white'
+                ? 'border-[#1c1917] bg-stone-50'
+                : 'border-stone-200 bg-white'
             }`}
           >
             <div
               className={`w-5 h-5 rounded flex-shrink-0 mt-0.5 flex items-center justify-center border-2 transition-all ${
-                survey.dataConsent ? 'bg-emerald-500 border-emerald-500' : 'border-sage-300'
+                survey.dataConsent ? 'bg-[#1c1917] border-[#1c1917]' : 'border-stone-300'
               }`}
             >
               {survey.dataConsent && (
@@ -262,7 +262,7 @@ export default function OnboardingPage() {
                 </svg>
               )}
             </div>
-            <p className="text-xs text-sage-600 leading-relaxed">
+            <p className="text-xs text-stone-500 leading-relaxed">
               <Link href="/privacy" className="text-emerald-600 underline">プライバシーポリシー</Link>
               および
               <Link href="/terms" className="text-emerald-600 underline">利用規約</Link>
@@ -278,16 +278,16 @@ export default function OnboardingPage() {
           <div className="flex gap-2">
             <button
               onClick={() => setStep('profile')}
-              className="py-4 px-6 rounded-2xl text-sm text-sage-500 bg-white hover:bg-sage-50 transition-colors"
+              className="py-4 px-6 rounded-2xl text-sm text-stone-500 bg-white border border-stone-200 hover:bg-stone-50 transition-colors"
             >
-              ← もどる
+              もどる
             </button>
             <button
               onClick={handleFinish}
               disabled={!canProceedSurvey || saving}
-              className="flex-1 bg-emerald-500 text-white font-bold py-4 rounded-2xl shadow-md hover:bg-emerald-600 transition-colors active:scale-95 disabled:opacity-40"
+              className="flex-1 bg-[#1c1917] text-white font-semibold py-4 rounded-2xl hover:bg-stone-800 transition-colors active:scale-[0.98] disabled:opacity-40 text-sm"
             >
-              {saving ? '保存中...' : 'KakeSoをはじめる 🌿'}
+              {saving ? '保存中...' : 'KakeSoをはじめる'}
             </button>
           </div>
         </div>
@@ -296,22 +296,20 @@ export default function OnboardingPage() {
       {/* ── Step 3: Done ── */}
       {step === 'done' && (
         <div className="flex-1 flex flex-col items-center justify-center text-center gap-6 pb-10">
-          <div className="w-24 h-24 rounded-full bg-emerald-100 flex items-center justify-center text-5xl pulse-soft">
+          <div className="w-24 h-24 rounded-full bg-[#1c1917] flex items-center justify-center text-5xl">
             {avatar}
           </div>
           <div>
-            <h1 className="text-2xl font-bold text-sage-800 mb-2">
-              {name}さん、
-              <br />
-              ようこそ！🎉
+            <h1 className="text-2xl font-bold text-stone-900 tracking-tight">
+              {name}さん、ようこそ
             </h1>
-            <p className="text-sm text-sage-500">KakeSoで節約ライフをはじめよう🌿</p>
+            <p className="text-sm text-stone-500 mt-1">KakeSoで節約ライフをはじめよう</p>
           </div>
-          <div className="flex gap-1">
+          <div className="flex gap-1.5">
             {[0, 1, 2].map((i) => (
               <span
                 key={i}
-                className="w-2 h-2 bg-emerald-400 rounded-full animate-bounce"
+                className="w-2 h-2 bg-[#1c1917] rounded-full animate-bounce"
                 style={{ animationDelay: `${i * 0.15}s` }}
               />
             ))}

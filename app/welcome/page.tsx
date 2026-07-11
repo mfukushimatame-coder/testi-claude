@@ -28,42 +28,42 @@ export default function WelcomePage() {
   }, [router])
 
   return (
-    <div className="min-h-svh flex flex-col items-center justify-between bg-beige-100 px-6 py-12 max-w-lg mx-auto">
+    <div className="min-h-svh flex flex-col items-center justify-between bg-[#f0ebe3] px-6 py-12 max-w-lg mx-auto">
       <div />
 
       <div className="flex flex-col items-center text-center gap-6">
-        <div className="w-24 h-24 rounded-3xl bg-emerald-500 flex items-center justify-center shadow-lg shadow-emerald-200">
-          <span className="text-5xl">🌿</span>
+        <div className="w-20 h-20 rounded-3xl bg-[#1c1917] flex items-center justify-center">
+          <span className="text-white text-3xl font-bold">K</span>
         </div>
 
         <div>
-          <h1 className="text-4xl font-bold gradient-text mb-2">KakeSo</h1>
-          <p className="text-sage-500 text-sm">カケソ</p>
+          <h1 className="text-4xl font-bold text-stone-900 tracking-tight mb-1">KakeSo</h1>
+          <p className="text-stone-400 text-sm tracking-widest">カケソ</p>
         </div>
 
         <div className="space-y-2">
-          <p className="text-xl font-semibold text-sage-800 leading-snug">
+          <p className="text-xl font-semibold text-stone-800 leading-snug">
             チャットで記録、
             <br />
-            SNSで節約モチベUP📣
+            仲間と続ける家計簿
           </p>
-          <p className="text-sm text-sage-500 leading-relaxed">
+          <p className="text-sm text-stone-500 leading-relaxed">
             「ランチ 800円」と打つだけで家計簿に記録。
             <br />
-            フレンドと節約を楽しもう！
+            フレンドと節約を楽しもう。
           </p>
         </div>
 
         <div className="w-full space-y-2 text-left">
           {[
-            { icon: '💬', text: 'チャットで気軽に記録' },
-            { icon: '📊', text: 'AIが支出を自動分析' },
-            { icon: '👥', text: 'フレンドと節約を競い合う' },
-            { icon: '🔥', text: '連続記録でストリーク達成' },
-          ].map(({ icon, text }) => (
-            <div key={text} className="glass rounded-2xl px-4 py-3 flex items-center gap-3">
-              <span className="text-xl">{icon}</span>
-              <span className="text-sm text-sage-700 font-medium">{text}</span>
+            'チャットで気軽に記録',
+            'AIが支出を自動分析',
+            'フレンドと節約を競い合う',
+            '連続記録でストリーク達成',
+          ].map((text) => (
+            <div key={text} className="bg-white border border-stone-200 rounded-2xl px-4 py-3 flex items-center gap-3">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 flex-shrink-0" />
+              <span className="text-sm text-stone-700 font-medium">{text}</span>
             </div>
           ))}
         </div>
@@ -72,20 +72,20 @@ export default function WelcomePage() {
       <div className="w-full space-y-3">
         <Link
           href="/auth"
-          className="block w-full bg-emerald-500 text-white text-center font-bold py-4 rounded-2xl shadow-md shadow-emerald-200 hover:bg-emerald-600 transition-colors active:scale-95 text-base"
+          className="block w-full bg-[#1c1917] text-white text-center font-semibold py-4 rounded-2xl hover:bg-stone-800 transition-colors active:scale-[0.98] text-sm"
         >
-          はじめる 🌱
+          はじめる
         </Link>
         <Link
           href="/auth?mode=login"
-          className="block w-full text-center text-sm text-sage-500 py-2 hover:text-sage-700 transition-colors"
+          className="block w-full text-center text-sm text-stone-500 py-2 hover:text-stone-700 transition-colors"
         >
           すでにアカウントをお持ちの方はこちら
         </Link>
-        <p className="text-center text-[11px] text-sage-400 pt-1">
-          <Link href="/privacy" className="underline hover:text-sage-600">プライバシーポリシー</Link>
+        <p className="text-center text-[11px] text-stone-400 pt-1">
+          <Link href="/privacy" className="underline hover:text-stone-600">プライバシーポリシー</Link>
           {' ・ '}
-          <Link href="/terms" className="underline hover:text-sage-600">利用規約</Link>
+          <Link href="/terms" className="underline hover:text-stone-600">利用規約</Link>
         </p>
       </div>
     </div>
