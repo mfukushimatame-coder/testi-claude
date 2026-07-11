@@ -20,6 +20,7 @@ export default function ProfilePage() {
   const [showAvatarPicker, setShowAvatarPicker] = useState(false)
   const [loggingOut, setLoggingOut] = useState(false)
   const [savingAvatar, setSavingAvatar] = useState(false)
+  const [deleting, setDeleting] = useState(false)
 
   const monthKey = getCurrentMonthKey()
   const now = new Date()
@@ -40,6 +41,27 @@ export default function ProfilePage() {
     const supabase = createClient()
     await supabase.auth.signOut()
     router.push('/auth')
+  }
+
+  const handleDeleteAccount = async () => {
+    const confirmed = window.confirm(
+      'アカウントを削除すると、家計簿・投稿・アンケートなどすべてのデータが消え、元に戻せません。本当に削除しますか？'
+    )
+    if (!confirmed) return
+
+    setDeleting(true)
+    try {
+      const res = await fetch('/api/account/delete', { method: 'POST' })
+      if (!res.ok) throw new Error('delete failed')
+      const supabase = createClient()
+      await supabase.auth.signOut()
+      // Full reload to clear all in-memory app state
+      window.location.href = '/welcome'
+    } catch (err) {
+      console.error(err)
+      setDeleting(false)
+      alert('削除に失敗しました。時間をおいて、もう一度お試しください。')
+    }
   }
 
   if (!currentUser) return null
@@ -200,7 +222,7 @@ export default function ProfilePage() {
         </div>
 
         {/* Logout */}
-        <div className="px-4 pb-4">
+        <div className="px-4 pb-2">
           <button
             onClick={handleLogout}
             disabled={loggingOut}
@@ -208,6 +230,20 @@ export default function ProfilePage() {
           >
             {loggingOut ? 'ログアウト中...' : 'ログアウト'}
           </button>
+        </div>
+
+        {/* Delete account */}
+        <div className="px-4 pb-6">
+          <button
+            onClick={handleDeleteAccount}
+            disabled={deleting}
+            className="w-full py-3 rounded-xl text-sm text-rose-500 hover:bg-rose-50 transition-colors disabled:opacity-40"
+          >
+            {deleting ? '削除中...' : 'アカウントを削除'}
+          </button>
+          <p className="text-[11px] text-gray-400 text-center mt-1 px-4 leading-relaxed">
+            削除するとすべてのデータが消え、元に戻せません
+          </p>
         </div>
       </main>
 
