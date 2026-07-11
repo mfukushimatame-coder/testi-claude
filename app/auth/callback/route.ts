@@ -35,7 +35,7 @@ export async function GET(request: NextRequest) {
         .eq('id', data.session.user.id)
         .single()
 
-      const destination = profile ? '/chat' : '/onboarding'
+      const destination = profile ? '/today' : '/onboarding'
       return NextResponse.redirect(new URL(destination, origin))
     }
   }

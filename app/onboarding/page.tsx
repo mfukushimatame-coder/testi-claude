@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
+import Link from 'next/link'
 import { useApp } from '@/context/AppContext'
 import { Survey } from '@/lib/types'
 
@@ -259,9 +260,11 @@ export default function OnboardingPage() {
               )}
             </div>
             <p className="text-xs text-gray-500 leading-relaxed">
-              アンケート情報（性別・年代・都道府県・利用歴）を
-              <strong className="text-gray-700">匿名化した上で第三者に提供すること</strong>
-              に同意します。個人を特定できる情報は一切含まれません。
+              <Link href="/privacy" className="text-emerald-600 underline">プライバシーポリシー</Link>
+              および
+              <Link href="/terms" className="text-emerald-600 underline">利用規約</Link>
+              に同意し、アンケート情報（性別・年代・都道府県・利用歴）を
+              統計データとして利用することに同意します。個人を特定できる情報は含まれません。
             </p>
           </button>
 

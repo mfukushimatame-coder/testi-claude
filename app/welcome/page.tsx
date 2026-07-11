@@ -64,6 +64,11 @@ export default function WelcomePage() {
         >
           ログインはこちら
         </Link>
+        <p className="text-center text-[11px] text-gray-400 pt-1">
+          <Link href="/privacy" className="underline hover:text-gray-600">プライバシーポリシー</Link>
+          {' ・ '}
+          <Link href="/terms" className="underline hover:text-gray-600">利用規約</Link>
+        </p>
       </div>
     </div>
   )

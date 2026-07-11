@@ -4,6 +4,7 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import BottomNav from '@/components/layout/BottomNav'
 import { useApp } from '@/context/AppContext'
+import { todayKey } from '@/lib/date'
 
 const DAILY_MESSAGES = [
   '昨日より、ちょっと未来に近づいた。',
@@ -41,7 +42,7 @@ export default function TodayPage() {
 
   const hour = new Date().getHours()
   const greeting = hour < 12 ? 'Good morning' : hour < 18 ? 'Good afternoon' : 'Good evening'
-  const today = new Date().toISOString().split('T')[0]
+  const today = todayKey()
   const dayOfYear = Math.floor((Date.now() - new Date(new Date().getFullYear(), 0, 0).getTime()) / 86400000)
   const dailyMessage = DAILY_MESSAGES[dayOfYear % DAILY_MESSAGES.length]
 

@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import Header from '@/components/layout/Header'
 import BottomNav from '@/components/layout/BottomNav'
 import { useApp } from '@/context/AppContext'
+import { localDateKey } from '@/lib/date'
 
 // ─── Badge catalog ────────────────────────────────────────────────────────────
 
@@ -27,7 +28,7 @@ function getThisWeekStart(): string {
   const diff = day === 0 ? 6 : day - 1
   const monday = new Date(d)
   monday.setDate(d.getDate() - diff)
-  return monday.toISOString().split('T')[0]
+  return localDateKey(monday)
 }
 
 function getWeekProgress(
@@ -41,7 +42,7 @@ function getWeekProgress(
 ): { current: number; pct: number } {
   const weekEnd = new Date(weekStart)
   weekEnd.setDate(weekEnd.getDate() + 6)
-  const weekEndStr = weekEnd.toISOString().split('T')[0]
+  const weekEndStr = localDateKey(weekEnd)
 
   if (type === 'spending_limit') {
     const spent = transactions
@@ -91,7 +92,7 @@ export default function ChallengePage() {
         for (let i = 0; i < 365; i++) {
           const d = new Date(today)
           d.setDate(today.getDate() - i)
-          const key = d.toISOString().split('T')[0]
+          const key = localDateKey(d)
           if (activeDates.has(key)) s++
           else break
         }
@@ -134,7 +135,7 @@ export default function ChallengePage() {
     return (
       n.userId === currentUser.id &&
       n.date >= thisWeekStart &&
-      n.date <= weekEnd.toISOString().split('T')[0]
+      n.date <= localDateKey(weekEnd)
     )
   }).length
 

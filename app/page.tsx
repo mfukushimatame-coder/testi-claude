@@ -25,10 +25,10 @@ export default function Home() {
         .eq('id', user.id)
         .single()
 
-      router.replace(profile ? '/chat' : '/onboarding')
+      router.replace(profile ? '/today' : '/onboarding')
     }
     checkAuth()
   }, [router])
 
-  return <div className="min-h-svh bg-beige-100" />
+  return <div className="min-h-svh bg-[#f0ebe3]" />
 }

@@ -24,6 +24,7 @@ import {
   BudgetGoal,
 } from '@/lib/types'
 import { createClient } from '@/lib/supabase-client'
+import { localDateKey } from '@/lib/date'
 
 // ───── Empty state (server-safe, no localStorage) ────────────────────────────
 
@@ -90,6 +91,9 @@ interface AppContextValue {
 
   // Budget goals
   setBudgetGoal: (category: string, amount: number) => Promise<void>
+
+  // Profile
+  updateProfile: (fields: { avatar?: string; name?: string; bio?: string }) => Promise<void>
 }
 
 const AppContext = createContext<AppContextValue | null>(null)
@@ -328,12 +332,19 @@ export function AppProvider({ children }: { children: ReactNode }) {
     []
   )
 
-  const deleteTransaction = useCallback((id: string) => {
+  const deleteTransaction = useCallback(async (id: string) => {
     const supabase = createClient()
-    const userId = supabase.auth.getUser().then(({ data }) => {
-      if (!data.user) return
-      supabase.from('transactions').delete().eq('id', id).eq('user_id', data.user.id)
-    })
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return
+    const { error } = await supabase
+      .from('transactions')
+      .delete()
+      .eq('id', id)
+      .eq('user_id', user.id)
+    if (error) {
+      console.error('Failed to delete transaction:', error)
+      return
+    }
     setState((prev) => ({
       ...prev,
       transactions: prev.transactions.filter((t) => t.id !== id),
@@ -380,108 +391,135 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
   const toggleLike = useCallback((postId: string) => {
     const supabase = createClient()
-    setState((prev) => {
-      const userId = prev.currentUserId
-      const post = prev.posts.find((p) => p.id === postId)
-      if (!post) return prev
+    const userId = state.currentUserId
+    const post = state.posts.find((p) => p.id === postId)
+    if (!post) return
 
-      const liked = post.likes.includes(userId)
-      if (liked) {
-        supabase
-          .from('post_likes')
-          .delete()
-          .eq('post_id', postId)
-          .eq('user_id', userId)
-      } else {
-        supabase
-          .from('post_likes')
-          .insert({ post_id: postId, user_id: userId })
+    const liked = post.likes.includes(userId)
+
+    // Optimistic UI update
+    const applyLike = (isLiked: boolean) =>
+      setState((prev) => ({
+        ...prev,
+        posts: prev.posts.map((p) => {
+          if (p.id !== postId) return p
+          const others = p.likes.filter((id) => id !== userId)
+          return { ...p, likes: isLiked ? [...others, userId] : others }
+        }),
+      }))
+
+    applyLike(!liked)
+
+    // Persist to DB, roll back on failure
+    const query = liked
+      ? supabase.from('post_likes').delete().eq('post_id', postId).eq('user_id', userId)
+      : supabase.from('post_likes').insert({ post_id: postId, user_id: userId })
+
+    query.then(({ error }) => {
+      if (error) {
+        console.error('Failed to toggle like:', error)
+        applyLike(liked)
       }
-
-      const posts = prev.posts.map((p) => {
-        if (p.id !== postId) return p
-        return {
-          ...p,
-          likes: liked
-            ? p.likes.filter((id) => id !== userId)
-            : [...p.likes, userId],
-        }
-      })
-      return { ...prev, posts }
     })
-  }, [])
+  }, [state.currentUserId, state.posts])
 
   const addComment = useCallback((postId: string, body: string) => {
     const supabase = createClient()
-    setState((prev) => {
-      const user = prev.users.find((u) => u.id === prev.currentUserId)
-      if (!user) return prev
+    const user = state.users.find((u) => u.id === state.currentUserId)
+    if (!user) return
 
-      const optimistic: Comment = {
-        id: `temp-${Date.now()}`,
-        userId: user.id,
-        userName: user.name,
-        userAvatar: user.avatar,
-        body,
-        createdAt: new Date().toISOString(),
-      }
+    const tempId = `temp-${Date.now()}`
+    const optimistic: Comment = {
+      id: tempId,
+      userId: user.id,
+      userName: user.name,
+      userAvatar: user.avatar,
+      body,
+      createdAt: new Date().toISOString(),
+    }
 
-      supabase.from('post_comments').insert({
-        post_id: postId,
-        user_id: user.id,
-        body,
-      })
-
-      const posts = prev.posts.map((p) =>
+    setState((prev) => ({
+      ...prev,
+      posts: prev.posts.map((p) =>
         p.id === postId ? { ...p, comments: [...p.comments, optimistic] } : p
-      )
-      return { ...prev, posts }
-    })
-  }, [])
+      ),
+    }))
+
+    supabase
+      .from('post_comments')
+      .insert({ post_id: postId, user_id: user.id, body })
+      .select()
+      .single()
+      .then(({ data, error }) => {
+        if (error || !data) {
+          console.error('Failed to add comment:', error)
+          // Roll back the optimistic comment
+          setState((prev) => ({
+            ...prev,
+            posts: prev.posts.map((p) =>
+              p.id === postId
+                ? { ...p, comments: p.comments.filter((c) => c.id !== tempId) }
+                : p
+            ),
+          }))
+          return
+        }
+        // Swap temp id for the real DB id
+        setState((prev) => ({
+          ...prev,
+          posts: prev.posts.map((p) =>
+            p.id === postId
+              ? {
+                  ...p,
+                  comments: p.comments.map((c) =>
+                    c.id === tempId ? { ...c, id: data.id } : c
+                  ),
+                }
+              : p
+          ),
+        }))
+      })
+  }, [state.users, state.currentUserId])
 
   // ── Follow ────────────────────────────────────────────────────────────────────
 
   const toggleFollow = useCallback((targetUserId: string) => {
     const supabase = createClient()
-    setState((prev) => {
-      const userId = prev.currentUserId
-      const currentUser = prev.users.find((u) => u.id === userId)
-      const alreadyFollowing = currentUser?.following.includes(targetUserId) ?? false
+    const userId = state.currentUserId
+    const currentUser = state.users.find((u) => u.id === userId)
+    const alreadyFollowing = currentUser?.following.includes(targetUserId) ?? false
 
-      if (alreadyFollowing) {
-        supabase
-          .from('follows')
-          .delete()
-          .eq('follower_id', userId)
-          .eq('following_id', targetUserId)
-      } else {
-        supabase
-          .from('follows')
-          .insert({ follower_id: userId, following_id: targetUserId })
+    // Optimistic UI update
+    const applyFollow = (follow: boolean) =>
+      setState((prev) => ({
+        ...prev,
+        users: prev.users.map((u) => {
+          if (u.id === userId) {
+            const others = u.following.filter((id) => id !== targetUserId)
+            return { ...u, following: follow ? [...others, targetUserId] : others }
+          }
+          if (u.id === targetUserId) {
+            const others = u.followers.filter((id) => id !== userId)
+            return { ...u, followers: follow ? [...others, userId] : others }
+          }
+          return u
+        }),
+      }))
+
+    applyFollow(!alreadyFollowing)
+
+    // Persist to DB, roll back on failure
+    const query = alreadyFollowing
+      ? supabase.from('follows').delete().eq('follower_id', userId).eq('following_id', targetUserId)
+      : supabase.from('follows').insert({ follower_id: userId, following_id: targetUserId })
+
+    query.then(({ error }) => {
+      if (error) {
+        console.error('Failed to toggle follow:', error)
+        applyFollow(alreadyFollowing)
       }
-
-      const users = prev.users.map((u) => {
-        if (u.id === userId) {
-          return {
-            ...u,
-            following: alreadyFollowing
-              ? u.following.filter((id) => id !== targetUserId)
-              : [...u.following, targetUserId],
-          }
-        }
-        if (u.id === targetUserId) {
-          return {
-            ...u,
-            followers: alreadyFollowing
-              ? u.followers.filter((id) => id !== userId)
-              : [...u.followers, userId],
-          }
-        }
-        return u
-      })
-      return { ...prev, users }
     })
-  }, [])
+  }, [state.currentUserId, state.users])
 
   const isFollowing = useCallback(
     (targetUserId: string): boolean => {
@@ -505,16 +543,16 @@ export function AppProvider({ children }: { children: ReactNode }) {
         chatMessages: [...prev.chatMessages, newMsg],
       }))
 
-      // Persist to DB (fire and forget)
+      // Persist to DB
       const supabase = createClient()
       supabase.auth.getUser().then(({ data: { user } }) => {
-        if (user) {
-          supabase.from('chat_messages').insert({
-            user_id: user.id,
-            role: msg.role,
-            content: msg.content,
+        if (!user) return
+        supabase
+          .from('chat_messages')
+          .insert({ user_id: user.id, role: msg.role, content: msg.content })
+          .then(({ error }) => {
+            if (error) console.error('Failed to save chat message:', error)
           })
-        }
       })
     },
     []
@@ -524,9 +562,14 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setState((prev) => ({ ...prev, chatMessages: [] }))
     const supabase = createClient()
     supabase.auth.getUser().then(({ data: { user } }) => {
-      if (user) {
-        supabase.from('chat_messages').delete().eq('user_id', user.id)
-      }
+      if (!user) return
+      supabase
+        .from('chat_messages')
+        .delete()
+        .eq('user_id', user.id)
+        .then(({ error }) => {
+          if (error) console.error('Failed to clear chat:', error)
+        })
     })
   }, [])
 
@@ -635,6 +678,28 @@ export function AppProvider({ children }: { children: ReactNode }) {
     }
   }, [])
 
+  // ── Profile update ────────────────────────────────────────────────────────────
+
+  const updateProfile = useCallback(async (fields: { avatar?: string; name?: string; bio?: string }) => {
+    const supabase = createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return
+    const { error } = await supabase
+      .from('profiles')
+      .update(fields)
+      .eq('id', user.id)
+    if (error) {
+      console.error('Failed to update profile:', error)
+      return
+    }
+    setState((prev) => ({
+      ...prev,
+      users: prev.users.map((u) =>
+        u.id === user.id ? { ...u, ...fields } : u
+      ),
+    }))
+  }, [])
+
   // ── NMD (No-Money-Day) ────────────────────────────────────────────────────────
 
   const recordNMD = useCallback(async (): Promise<void> => {
@@ -644,7 +709,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     } = await supabase.auth.getUser()
     if (!user) return
 
-    const today = new Date().toISOString().split('T')[0]
+    const today = localDateKey()
     const { data, error } = await supabase
       .from('no_money_days')
       .insert({ user_id: user.id, date: today })
@@ -661,7 +726,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   }, [])
 
   const hasNMDToday = useCallback((): boolean => {
-    const today = new Date().toISOString().split('T')[0]
+    const today = localDateKey()
     return state.noMoneyDays.some(
       (n) => n.userId === state.currentUserId && n.date === today
     )
@@ -681,7 +746,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     for (let i = 0; i < 365; i++) {
       const d = new Date(today)
       d.setDate(today.getDate() - i)
-      const key = d.toISOString().split('T')[0]
+      const key = localDateKey(d)
       if (activeDates.has(key)) {
         streak++
       } else {
@@ -727,28 +792,38 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
   const joinChallenge = useCallback((challengeId: string) => {
     const supabase = createClient()
-    setState((prev) => {
-      const userId = prev.currentUserId
-      const alreadyIn = prev.challengeParticipants.some(
-        (p) => p.challengeId === challengeId && p.userId === userId
-      )
-      if (alreadyIn) return prev
+    const userId = state.currentUserId
+    const alreadyIn = state.challengeParticipants.some(
+      (p) => p.challengeId === challengeId && p.userId === userId
+    )
+    if (alreadyIn) return
 
-      supabase
-        .from('challenge_participants')
-        .insert({ challenge_id: challengeId, user_id: userId })
+    const participant: ChallengeParticipant = {
+      challengeId,
+      userId,
+      joinedAt: new Date().toISOString(),
+    }
 
-      const p: ChallengeParticipant = {
-        challengeId,
-        userId,
-        joinedAt: new Date().toISOString(),
-      }
-      return {
-        ...prev,
-        challengeParticipants: [...prev.challengeParticipants, p],
-      }
-    })
-  }, [])
+    setState((prev) => ({
+      ...prev,
+      challengeParticipants: [...prev.challengeParticipants, participant],
+    }))
+
+    supabase
+      .from('challenge_participants')
+      .insert({ challenge_id: challengeId, user_id: userId })
+      .then(({ error }) => {
+        if (error) {
+          console.error('Failed to join challenge:', error)
+          setState((prev) => ({
+            ...prev,
+            challengeParticipants: prev.challengeParticipants.filter(
+              (cp) => !(cp.challengeId === challengeId && cp.userId === userId)
+            ),
+          }))
+        }
+      })
+  }, [state.currentUserId, state.challengeParticipants])
 
   return (
     <AppContext.Provider
@@ -772,6 +847,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
         awardBadgeIfNeeded,
         joinChallenge,
         setBudgetGoal,
+        updateProfile,
       }}
     >
       {children}

@@ -14,11 +14,13 @@ import { createClient } from '@/lib/supabase-client'
 const AVATARS = ['🌿', '🌸', '🦋', '🌻', '🍀', '🌈', '⭐', '🎯', '🦁', '🐬', '🦊', '🐧']
 
 export default function ProfilePage() {
-  const { state, currentUser, isLoading } = useApp()
+  const { state, currentUser, isLoading, updateProfile } = useApp()
   const router = useRouter()
   const [tab, setTab] = useState<'posts' | 'stats' | 'friends'>('posts')
   const [showAvatarPicker, setShowAvatarPicker] = useState(false)
   const [loggingOut, setLoggingOut] = useState(false)
+  const [savingAvatar, setSavingAvatar] = useState(false)
+  const [deleting, setDeleting] = useState(false)
 
   const monthKey = getCurrentMonthKey()
   const now = new Date()
@@ -39,6 +41,26 @@ export default function ProfilePage() {
     const supabase = createClient()
     await supabase.auth.signOut()
     router.push('/auth')
+  }
+
+  const handleDeleteAccount = async () => {
+    const confirmed = window.confirm(
+      'アカウントを削除すると、家計簿・投稿・アンケートなどすべてのデータが消え、元に戻せません。本当に削除しますか？'
+    )
+    if (!confirmed) return
+
+    setDeleting(true)
+    try {
+      const res = await fetch('/api/account/delete', { method: 'POST' })
+      if (!res.ok) throw new Error('delete failed')
+      const supabase = createClient()
+      await supabase.auth.signOut()
+      window.location.href = '/welcome'
+    } catch (err) {
+      console.error(err)
+      setDeleting(false)
+      alert('削除に失敗しました。時間をおいて、もう一度お試しください。')
+    }
   }
 
   if (isLoading) return (
@@ -98,13 +120,25 @@ export default function ProfilePage() {
           {/* Avatar picker */}
           {showAvatarPicker && (
             <div className="mt-4 p-3 bg-gray-50 rounded-xl">
-              <p className="text-xs text-gray-400 mb-2">アバターを選択</p>
+              <p className="text-xs text-gray-400 mb-2">
+                {savingAvatar ? '保存中...' : 'アバターを選択'}
+              </p>
               <div className="grid grid-cols-6 gap-2">
                 {AVATARS.map((emoji) => (
                   <button
                     key={emoji}
-                    onClick={() => setShowAvatarPicker(false)}
-                    className={`text-2xl p-2 rounded-lg transition-all active:scale-90 ${
+                    disabled={savingAvatar}
+                    onClick={async () => {
+                      if (emoji === currentUser.avatar) {
+                        setShowAvatarPicker(false)
+                        return
+                      }
+                      setSavingAvatar(true)
+                      await updateProfile({ avatar: emoji })
+                      setSavingAvatar(false)
+                      setShowAvatarPicker(false)
+                    }}
+                    className={`text-2xl p-2 rounded-lg transition-all active:scale-90 disabled:opacity-50 ${
                       currentUser.avatar === emoji ? 'bg-emerald-100' : 'hover:bg-gray-100'
                     }`}
                   >
@@ -201,7 +235,7 @@ export default function ProfilePage() {
         </div>
 
         {/* Logout */}
-        <div className="px-4 pb-4">
+        <div className="px-4 pb-2">
           <button
             onClick={handleLogout}
             disabled={loggingOut}
@@ -209,6 +243,20 @@ export default function ProfilePage() {
           >
             {loggingOut ? 'ログアウト中...' : 'ログアウト'}
           </button>
+        </div>
+
+        {/* Delete account */}
+        <div className="px-4 pb-6">
+          <button
+            onClick={handleDeleteAccount}
+            disabled={deleting}
+            className="w-full py-3 rounded-xl text-sm text-rose-500 hover:bg-rose-50 transition-colors disabled:opacity-40"
+          >
+            {deleting ? '削除中...' : 'アカウントを削除'}
+          </button>
+          <p className="text-[11px] text-gray-400 text-center mt-1 leading-relaxed">
+            削除するとすべてのデータが消え、元に戻せません
+          </p>
         </div>
       </main>
 

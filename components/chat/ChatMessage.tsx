@@ -39,8 +39,8 @@ export default function ChatMessage({ message, onSharePost }: Props) {
           {renderContent(message.content)}
         </div>
 
-        {/* Share button for recorded transactions */}
-        {!isUser && message.content.includes('記録しました') && onSharePost && (
+        {/* Share button for recorded transactions (parent decides via onSharePost) */}
+        {!isUser && onSharePost && (
           <div className="mt-2 flex gap-2">
             <button
               onClick={onSharePost}
